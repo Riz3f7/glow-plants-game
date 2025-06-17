@@ -34,10 +34,11 @@ body {
 /* PC表示用のレスポンシブデザイン */
 @media (min-width: 1024px) {
   .game-container {
-    max-width: 1000px;
+    max-width: 1200px;
     display: flex;
     flex-direction: column;
     height: 100vh;
+    overflow: hidden;
     border-radius: 0;
   }
   
@@ -51,6 +52,8 @@ body {
     flex: 1;
     overflow-y: auto;
     padding: 20px;
+    display: flex;
+    flex-direction: column;
   }
   
   .game-sidebar {
@@ -64,14 +67,17 @@ body {
   .pc-layout {
     display: flex;
     gap: 20px;
+    flex: 1;
   }
   
   .pc-column {
     flex: 1;
+    display: flex;
+    flex-direction: column;
   }
   
   .pc-fixed-height {
-    max-height: calc(100vh - 180px);
+    flex: 1;
     overflow-y: auto;
     padding-right: 10px;
   }
@@ -90,11 +96,109 @@ body {
     border-radius: 20px;
     cursor: pointer;
     transition: all 0.3s ease;
+    border: none;
+    background: none;
   }
   
   .pc-nav-button.active {
     background-color: var(--primary-color);
     color: white;
+  }
+  
+  /* 固定フッター（PC用） */
+  .pc-footer {
+    padding: 10px 20px;
+    background-color: #f5f5f5;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    overflow: hidden;
+  }
+  
+  .game-info-compact {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  
+  .info-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  /* イベントメッセージ */
+  .event-message {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #f3e5f5;
+    border: 1px solid #e1bee7;
+    border-radius: 20px;
+    padding: 5px 15px;
+    max-width: 400px;
+    overflow: hidden;
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  
+  .event-icon {
+    font-size: 20px;
+    color: #9c27b0;
+    animation: pulse 2s infinite;
+  }
+  
+  .event-text {
+    font-size: 13px;
+    color: #7b1fa2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .end-turn-button {
+    padding: 8px 20px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+  
+  .end-turn-button:hover {
+    background-color: #388e3c;
+    transform: translateY(-2px);
+  }
+  
+  .plant-cards-container {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 10px;
+  }
+  
+  /* PCでは非表示、モバイルでは表示 */
+  .lg\:hidden {
+    display: block;
+  }
+  
+  @media (min-width: 1024px) {
+    .lg\:hidden {
+      display: none;
+    }
   }
 }
 
@@ -122,6 +226,14 @@ body {
   
   .pc-nav {
     display: none;
+  }
+  
+  .pc-footer {
+    display: none;
+  }
+  
+  .plant-cards-container {
+    margin-bottom: 20px;
   }
 }
 
@@ -221,6 +333,9 @@ body {
   padding: 8px;
   border-radius: 12px;
   transition: all 0.3s ease;
+  border: none;
+  background: none;
+  cursor: pointer;
 }
 
 .nav-button.active {
