@@ -1,8 +1,6 @@
 // amplify-config.ts
 import { Amplify } from 'aws-amplify';
 
-Amplify.configure({
-  // Your Amplify configuration will be populated here after deployment
-  // This is a placeholder that will be updated with actual values
-  ssr: true
-});
+// 最小限の設定で初期化
+// 実際のデプロイ後に必要な設定を追加できます
+Amplify.configure({});
