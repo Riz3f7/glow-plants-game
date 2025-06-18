@@ -73,6 +73,20 @@ const updateAchievements = (state: GameState): GameState => {
   };
 };
 
+// 植物が枯れているかチェックする関数
+const checkDeadPlants = (state: GameState): GameState => {
+  const deadPlants = state.plants.filter(plant => plant.condition === 'dead');
+  if (deadPlants.length > 0 && state.plants.length === deadPlants.length) {
+    // すべての植物が枯れている場合、植物を削除して新しい植物を選択できるようにする
+    return {
+      ...state,
+      plants: [], // 植物をクリア
+      eventMessages: [...state.eventMessages, `🌱 新しい植物を選んでください`]
+    };
+  }
+  return state;
+};
+
 // リデューサー関数
 const gameReducer = (state: GameState, action: GameAction): GameState => {
   let updatedState = { ...state };
@@ -98,6 +112,9 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         eventMessages: [...state.eventMessages, `💧 ${updatedPlants[plantIndex].name}に水をあげました`]
       };
       
+      // 植物が枯れているかチェック
+      updatedState = checkDeadPlants(updatedState);
+      
       // 実績の更新
       return updateAchievements(updatedState);
     }
@@ -119,6 +136,9 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         eventMessages: [...state.eventMessages, `🌿 ${updatedPlants[plantIndex].name}に肥料をあげました`]
       };
       
+      // 植物が枯れているかチェック
+      updatedState = checkDeadPlants(updatedState);
+      
       // 実績の更新
       return updateAchievements(updatedState);
     }
@@ -139,6 +159,9 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         careActionCount: (state.careActionCount || 0) + 1, // 世話カウントを追加
         eventMessages: [...state.eventMessages, `☀️ ${updatedPlants[plantIndex].name}に日光を当てました`]
       };
+      
+      // 植物が枯れているかチェック
+      updatedState = checkDeadPlants(updatedState);
       
       // 実績の更新
       return updateAchievements(updatedState);
@@ -247,6 +270,17 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
           ...plant,
           growthMessage: undefined
         }));
+      }
+      
+      // 植物が枯れているかチェック
+      const deadPlants = updatedState.plants.filter(plant => plant.condition === 'dead');
+      if (deadPlants.length > 0 && updatedState.plants.length === deadPlants.length) {
+        // すべての植物が枯れている場合、植物を削除して新しい植物を選択できるようにする
+        updatedState = {
+          ...updatedState,
+          plants: [], // 植物をクリア
+          eventMessages: [...updatedState.eventMessages, `🌱 新しい植物を選んでください`]
+        };
       }
       
       // ランダムイベントをイベントメッセージに追加
