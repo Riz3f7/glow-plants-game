@@ -3,8 +3,6 @@
 import React from 'react';
 import Image from 'next/image';
 import { Plant, GrowthStage, PlantCondition } from '../models/Plant';
-import Button from './Button';
-import { growthStageImages } from '../utils/initialData';
 
 interface PlantCardProps {
   plant: Plant;
@@ -23,7 +21,10 @@ const PlantCard: React.FC<PlantCardProps> = ({
   onHarvest,
   actionsRemaining,
 }) => {
-  // 成長段階に応じたテキスト
+  // 収穫可能かどうか
+  const canHarvest = plant.currentStage === GrowthStage.FRUITING;
+  
+  // 成長段階のテキスト
   const stageText = {
     [GrowthStage.SEED]: '種',
     [GrowthStage.SPROUT]: '芽',
@@ -32,19 +33,52 @@ const PlantCard: React.FC<PlantCardProps> = ({
     [GrowthStage.FLOWERING]: '開花',
     [GrowthStage.FRUITING]: '結実',
   };
-
-  // 状態に応じたテキストと色
+  
+  // 植物の状態に応じた情報
   const conditionInfo = {
-    [PlantCondition.EXCELLENT]: { text: '絶好調', color: 'text-green-500', bgColor: 'bg-green-100', icon: '✨' },
-    [PlantCondition.GOOD]: { text: '良好', color: 'text-green-400', bgColor: 'bg-green-50', icon: '😊' },
-    [PlantCondition.NORMAL]: { text: '普通', color: 'text-blue-400', bgColor: 'bg-blue-50', icon: '😐' },
-    [PlantCondition.POOR]: { text: '不調', color: 'text-yellow-500', bgColor: 'bg-yellow-50', icon: '😟' },
-    [PlantCondition.CRITICAL]: { text: '危険', color: 'text-red-500', bgColor: 'bg-red-50', icon: '😨' },
-    [PlantCondition.DEAD]: { text: '枯れた', color: 'text-gray-500', bgColor: 'bg-gray-100', icon: '💀' },
+    [PlantCondition.EXCELLENT]: {
+      text: '絶好調',
+      icon: '✨',
+      color: 'text-green-800',
+      bgColor: 'bg-green-100',
+      growthMultiplier: '2.0倍'
+    },
+    [PlantCondition.GOOD]: {
+      text: '良好',
+      icon: '😊',
+      color: 'text-blue-800',
+      bgColor: 'bg-blue-100',
+      growthMultiplier: '1.5倍'
+    },
+    [PlantCondition.NORMAL]: {
+      text: '普通',
+      icon: '😐',
+      color: 'text-gray-800',
+      bgColor: 'bg-gray-100',
+      growthMultiplier: '1.0倍'
+    },
+    [PlantCondition.POOR]: {
+      text: '不調',
+      icon: '😟',
+      color: 'text-yellow-800',
+      bgColor: 'bg-yellow-100',
+      growthMultiplier: '0.7倍'
+    },
+    [PlantCondition.CRITICAL]: {
+      text: '危険',
+      icon: '😨',
+      color: 'text-red-800',
+      bgColor: 'bg-red-100',
+      growthMultiplier: '0.3倍'
+    },
+    [PlantCondition.DEAD]: {
+      text: '枯れた',
+      icon: '💀',
+      color: 'text-gray-800',
+      bgColor: 'bg-gray-200',
+      growthMultiplier: '0倍'
+    },
   };
-
-  // 収穫可能かどうか
-  const canHarvest = plant.currentStage === GrowthStage.FRUITING;
   
   // 成長段階に応じた画像を取得
   const getPlantImage = () => {
@@ -99,15 +133,7 @@ const PlantCard: React.FC<PlantCardProps> = ({
     // デフォルトの画像
     return plant.imageUrl;
   };
-
-  // アクションボタンのアイコン
-  const actionIcons = {
-    water: '/assets/images/output/watering_icon.png',
-    fertilize: '/assets/images/output/fertilizer_icon.png',
-    sunlight: '/assets/images/output/sunlight_icon.png',
-    harvest: '/assets/images/output/plant_icon_1.png',
-  };
-
+  
   return (
     <div style={{
       backgroundColor: 'white',
@@ -168,6 +194,15 @@ const PlantCard: React.FC<PlantCardProps> = ({
           }}>
             <span style={{ marginRight: '4px' }}>{conditionInfo[plant.condition].icon}</span>
             {conditionInfo[plant.condition].text}
+            <span style={{ 
+              marginLeft: '5px', 
+              fontSize: '10px', 
+              backgroundColor: 'rgba(255,255,255,0.5)', 
+              padding: '1px 4px', 
+              borderRadius: '4px' 
+            }}>
+              成長率 {conditionInfo[plant.condition].growthMultiplier}
+            </span>
           </div>
         </div>
       </div>
@@ -376,6 +411,27 @@ const PlantCard: React.FC<PlantCardProps> = ({
           ></div>
         </div>
       </div>
+      
+      {/* ケアなしのターン数を表示 */}
+      {plant.turnsWithoutCare && plant.turnsWithoutCare > 0 && (
+        <div style={{
+          backgroundColor: plant.turnsWithoutCare >= 3 ? '#ffebee' : '#fff8e1',
+          padding: '5px 10px',
+          borderRadius: '8px',
+          marginBottom: '10px',
+          fontSize: '12px',
+          fontWeight: 'bold',
+          color: plant.turnsWithoutCare >= 3 ? '#d32f2f' : '#ff9800',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <span style={{ marginRight: '5px' }}>⚠️</span>
+          {plant.turnsWithoutCare >= 3 
+            ? `${plant.turnsWithoutCare}ターン世話されていません！健康度が急速に低下中！` 
+            : `${plant.turnsWithoutCare}ターン世話されていません`}
+        </div>
+      )}
 
       <div style={{
         display: 'grid',

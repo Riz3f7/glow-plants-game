@@ -39,6 +39,10 @@ const getInitialState = (): GameState => {
   initialState.player.achievements = initialAchievements;
   initialState.player.inventory = initialItems.filter(item => item.quantity > 0);
   
+  // ゲーム性を高めるための調整
+  initialState.actionsPerTurn = 3; // 1ターンあたりのアクション数を減らす（デフォルトは5）
+  initialState.maxTurns = 20;      // 最大ターン数を設定（これを超えるとゲームオーバー）
+  
   return initialState;
 };
 
@@ -56,53 +60,6 @@ const updateAchievements = (state: GameState): GameState => {
       }
     }
   }
-  
-  // コレクター（3種類の植物）
-  const uniqueSpecies = new Set(state.discoveredPlants.map(p => p.species));
-  const collectorAchievement = updatedAchievements.find(a => a.id === 'achievement_plant_collector');
-  if (collectorAchievement) {
-    collectorAchievement.progress = uniqueSpecies.size;
-    if (collectorAchievement.progress >= collectorAchievement.goal && !collectorAchievement.completed) {
-      collectorAchievement.completed = true;
-    }
-  }
-  
-  // グリーンサム（植物を完全に成長させる）
-  const hasFullyGrownPlant = state.plants.some(p => p.currentStage === 'fruiting') || 
-                            state.discoveredPlants.some(p => p.currentStage === 'fruiting');
-  const greenThumbAchievement = updatedAchievements.find(a => a.id === 'achievement_green_thumb');
-  if (greenThumbAchievement && !greenThumbAchievement.completed && hasFullyGrownPlant) {
-    greenThumbAchievement.progress = 1;
-    if (greenThumbAchievement.progress >= greenThumbAchievement.goal) {
-      greenThumbAchievement.completed = true;
-    }
-  }
-  
-  // 植物マスター（10ターン以上植物を生かし続ける）
-  const longestLivingPlant = Math.max(
-    ...state.plants.map(p => p.turnsAlive),
-    ...state.discoveredPlants.map(p => p.turnsAlive)
-  );
-  const plantMasterAchievement = updatedAchievements.find(a => a.id === 'achievement_plant_master');
-  if (plantMasterAchievement) {
-    plantMasterAchievement.progress = longestLivingPlant;
-    if (plantMasterAchievement.progress >= plantMasterAchievement.goal && !plantMasterAchievement.completed) {
-      plantMasterAchievement.completed = true;
-    }
-  }
-  
-  // 植物学者（すべての種類の植物を発見）
-  const botanistAchievement = updatedAchievements.find(a => a.id === 'achievement_botanist');
-  if (botanistAchievement) {
-    botanistAchievement.progress = uniqueSpecies.size;
-    if (botanistAchievement.progress >= botanistAchievement.goal && !botanistAchievement.completed) {
-      botanistAchievement.completed = true;
-    }
-  }
-  
-  // 熟練の庭師（植物を20回世話する）- このカウントは別途追跡する必要があります
-  
-  // 収穫王（5回植物を収穫する）- このカウントは別途追跡する必要があります
   
   return {
     ...state,
@@ -254,135 +211,15 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       // 利用可能な植物から選択された植物を追加
       const newPlant = action.plant;
       
-      updatedState = {
-        ...state,
-        plants: [...state.plants, newPlant],
+      // turnsWithoutCareプロパティを追加
+      const plantWithCare = {
+        ...newPlant,
+        turnsWithoutCare: 0
       };
-      
-      // 実績の更新
-      return updateAchievements(updatedState);
-    }
-    
-    case 'REMOVE_PLANT': {
-      const updatedPlants = state.plants.filter(p => p.id !== action.plantId);
       
       updatedState = {
         ...state,
-        plants: updatedPlants,
-      };
-      
-      // 実績の更新
-      return updateAchievements(updatedState);
-    }
-    
-    case 'BUY_ITEM': {
-      const item = state.shopItems.find(i => i.id === action.itemId);
-      if (!item) return state;
-      
-      // 所持金が足りるかチェック
-      if (state.player.currency < item.price) return state;
-      
-      // アイテムを購入
-      const boughtItem = { ...item, quantity: 1 };
-      const updatedPlayer = addItem(
-        { ...state.player, currency: state.player.currency - item.price },
-        boughtItem
-      );
-      
-      updatedState = {
-        ...state,
-        player: updatedPlayer,
-      };
-      
-      // 実績の更新
-      return updateAchievements(updatedState);
-    }
-    
-    case 'USE_ITEM': {
-      const item = state.player.inventory.find(i => i.id === action.itemId);
-      if (!item || item.quantity <= 0) return state;
-      
-      const plantIndex = state.plants.findIndex(p => p.id === action.plantId);
-      if (plantIndex < 0) return state;
-      
-      // アイテムの効果を適用
-      let updatedPlant = { ...state.plants[plantIndex] };
-      
-      switch (item.effect.type) {
-        case 'water':
-          updatedPlant.stats.waterLevel = Math.min(100, updatedPlant.stats.waterLevel + item.effect.value);
-          break;
-        case 'nutrient':
-          updatedPlant.stats.nutrientLevel = Math.min(100, updatedPlant.stats.nutrientLevel + item.effect.value);
-          break;
-        case 'sunlight':
-          updatedPlant.stats.sunlightLevel = Math.min(100, updatedPlant.stats.sunlightLevel + item.effect.value);
-          break;
-        case 'health':
-          updatedPlant.stats.health = Math.min(100, updatedPlant.stats.health + item.effect.value);
-          break;
-        case 'growth':
-          updatedPlant.stats.growthProgress = Math.min(100, updatedPlant.stats.growthProgress + item.effect.value);
-          break;
-      }
-      
-      // アイテムを消費
-      const updatedPlayer = useItem(state.player, action.itemId);
-      
-      // 植物を更新
-      const updatedPlants = [...state.plants];
-      updatedPlants[plantIndex] = updatedPlant;
-      
-      updatedState = {
-        ...state,
-        plants: updatedPlants,
-        player: updatedPlayer,
-        actionsRemaining: state.actionsRemaining - 1,
-        careActionCount: (state.careActionCount || 0) + 1, // 世話カウントを追加
-      };
-      
-      // 実績の更新
-      return updateAchievements(updatedState);
-    }
-    
-    case 'COMPLETE_ACHIEVEMENT': {
-      const achievementIndex = state.player.achievements.findIndex(a => a.id === action.achievementId);
-      if (achievementIndex < 0 || state.player.achievements[achievementIndex].completed) return state;
-      
-      const achievement = state.player.achievements[achievementIndex];
-      let updatedPlayer = { ...state.player };
-      
-      // 報酬の付与
-      switch (achievement.reward.type) {
-        case 'currency':
-          updatedPlayer = addCurrency(updatedPlayer, achievement.reward.value);
-          break;
-        case 'experience':
-          // 経験値の追加は別の関数で実装
-          break;
-        case 'item':
-          if (achievement.reward.itemId) {
-            const rewardItem = state.shopItems.find(i => i.id === achievement.reward.itemId);
-            if (rewardItem) {
-              const itemToAdd = { ...rewardItem, quantity: achievement.reward.value };
-              updatedPlayer = addItem(updatedPlayer, itemToAdd);
-            }
-          }
-          break;
-      }
-      
-      // 実績を完了済みにする
-      const updatedAchievements = [...updatedPlayer.achievements];
-      updatedAchievements[achievementIndex] = {
-        ...updatedAchievements[achievementIndex],
-        completed: true,
-      };
-      
-      updatedPlayer.achievements = updatedAchievements;
-      
-      updatedState = {
-        ...state,
-        player: updatedPlayer,
+        plants: [...state.plants, plantWithCare],
       };
       
       // 実績の更新

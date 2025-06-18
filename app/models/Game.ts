@@ -20,14 +20,14 @@ export interface Achievement {
   id: string;
   name: string;
   description: string;
+  goal: number;
+  progress: number;
   completed: boolean;
   reward: {
-    type: 'currency' | 'item' | 'plant' | 'experience';
+    type: 'currency' | 'experience' | 'item';
     value: number;
     itemId?: string;
   };
-  progress: number;
-  goal: number;
 }
 
 export interface Player {
@@ -41,125 +41,111 @@ export interface Player {
 
 export interface GameState {
   currentTurn: number;
-  player: Player;
+  maxTurns: number; // 最大ターン数を追加
+  actionsPerTurn: number;
+  actionsRemaining: number;
   plants: Plant[];
   availablePlants: Plant[];
   discoveredPlants: Plant[];
   shopItems: GameItem[];
-  actionsPerTurn: number;
-  actionsRemaining: number;
+  player: Player;
   weather: 'sunny' | 'cloudy' | 'rainy';
   randomEvents: string[];
-  // 実績追跡用のカウンター
-  careActionCount?: number; // 植物の世話をした回数
-  harvestCount?: number;    // 収穫した回数
+  careActionCount?: number; // 世話をした回数
+  harvestCount?: number; // 収穫した回数
 }
 
-// 初期ゲーム状態を生成する関数
+// 初期ゲーム状態を作成する関数
 export const createInitialGameState = (): GameState => {
   return {
     currentTurn: 1,
+    maxTurns: 20, // 最大ターン数を設定
+    actionsPerTurn: 3, // 1ターンあたりのアクション数を減らす（デフォルトは5）
+    actionsRemaining: 3,
+    plants: [],
+    availablePlants: [],
+    discoveredPlants: [],
+    shopItems: [],
     player: {
       level: 1,
       experience: 0,
       experienceToNextLevel: 100,
       currency: 100,
       inventory: [],
-      achievements: [],
+      achievements: []
     },
-    plants: [],
-    availablePlants: [],
-    discoveredPlants: [],
-    shopItems: [],
-    actionsPerTurn: 3,
-    actionsRemaining: 3,
     weather: 'sunny',
     randomEvents: [],
     careActionCount: 0,
-    harvestCount: 0,
+    harvestCount: 0
   };
 };
 
-// プレイヤーレベルアップ関数
-export const levelUpPlayer = (player: Player): Player => {
-  const newLevel = player.level + 1;
-  const newExperienceToNextLevel = Math.floor(player.experienceToNextLevel * 1.5);
+// プレイヤーにアイテムを追加する関数
+export const addItem = (player: Player, item: GameItem): Player => {
+  const updatedInventory = [...player.inventory];
+  const existingItemIndex = updatedInventory.findIndex(i => i.id === item.id);
+  
+  if (existingItemIndex >= 0) {
+    // 既存のアイテムの数量を増やす
+    updatedInventory[existingItemIndex] = {
+      ...updatedInventory[existingItemIndex],
+      quantity: updatedInventory[existingItemIndex].quantity + item.quantity
+    };
+  } else {
+    // 新しいアイテムを追加
+    updatedInventory.push(item);
+  }
   
   return {
     ...player,
-    level: newLevel,
-    experience: player.experience - player.experienceToNextLevel,
-    experienceToNextLevel: newExperienceToNextLevel,
+    inventory: updatedInventory
   };
 };
 
-// 経験値を追加する関数
+// プレイヤーがアイテムを使用する関数
+export const useItem = (player: Player, itemId: string): Player => {
+  const updatedInventory = [...player.inventory];
+  const itemIndex = updatedInventory.findIndex(i => i.id === itemId);
+  
+  if (itemIndex >= 0) {
+    if (updatedInventory[itemIndex].quantity > 1) {
+      // 数量を減らす
+      updatedInventory[itemIndex] = {
+        ...updatedInventory[itemIndex],
+        quantity: updatedInventory[itemIndex].quantity - 1
+      };
+    } else {
+      // アイテムを削除
+      updatedInventory.splice(itemIndex, 1);
+    }
+  }
+  
+  return {
+    ...player,
+    inventory: updatedInventory
+  };
+};
+
+// プレイヤーに通貨を追加する関数
+export const addCurrency = (player: Player, amount: number): Player => {
+  return {
+    ...player,
+    currency: player.currency + amount
+  };
+};
+
+// プレイヤーに経験値を追加する関数
 export const addExperience = (player: Player, amount: number): Player => {
   let updatedPlayer = { ...player };
   updatedPlayer.experience += amount;
   
-  // レベルアップ処理
+  // レベルアップの処理
   while (updatedPlayer.experience >= updatedPlayer.experienceToNextLevel) {
-    updatedPlayer = levelUpPlayer(updatedPlayer);
+    updatedPlayer.experience -= updatedPlayer.experienceToNextLevel;
+    updatedPlayer.level += 1;
+    updatedPlayer.experienceToNextLevel = Math.floor(updatedPlayer.experienceToNextLevel * 1.5);
   }
   
   return updatedPlayer;
-};
-
-// 通貨を追加する関数
-export const addCurrency = (player: Player, amount: number): Player => {
-  return {
-    ...player,
-    currency: player.currency + amount,
-  };
-};
-
-// アイテムを追加する関数
-export const addItem = (player: Player, item: GameItem): Player => {
-  const existingItemIndex = player.inventory.findIndex(i => i.id === item.id);
-  
-  if (existingItemIndex >= 0) {
-    // 既存のアイテムの数量を増やす
-    const updatedInventory = [...player.inventory];
-    updatedInventory[existingItemIndex] = {
-      ...updatedInventory[existingItemIndex],
-      quantity: updatedInventory[existingItemIndex].quantity + item.quantity,
-    };
-    
-    return {
-      ...player,
-      inventory: updatedInventory,
-    };
-  } else {
-    // 新しいアイテムを追加
-    return {
-      ...player,
-      inventory: [...player.inventory, item],
-    };
-  }
-};
-
-// アイテムを使用する関数
-export const useItem = (player: Player, itemId: string): Player => {
-  const itemIndex = player.inventory.findIndex(i => i.id === itemId);
-  
-  if (itemIndex < 0 || player.inventory[itemIndex].quantity <= 0) {
-    return player; // アイテムがない場合は何もしない
-  }
-  
-  const updatedInventory = [...player.inventory];
-  updatedInventory[itemIndex] = {
-    ...updatedInventory[itemIndex],
-    quantity: updatedInventory[itemIndex].quantity - 1,
-  };
-  
-  // 数量が0になったらインベントリから削除
-  if (updatedInventory[itemIndex].quantity <= 0) {
-    updatedInventory.splice(itemIndex, 1);
-  }
-  
-  return {
-    ...player,
-    inventory: updatedInventory,
-  };
 };

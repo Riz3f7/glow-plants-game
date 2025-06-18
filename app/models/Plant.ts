@@ -47,6 +47,7 @@ export interface Plant {
   discovered: boolean;
   turnsAlive: number;
   maxStage: GrowthStage;
+  turnsWithoutCare?: number; // ケアなしのターン数を追加
 }
 
 // 植物の初期データを生成する関数
@@ -77,6 +78,7 @@ export const createNewPlant = (
     discovered: true,
     turnsAlive: 0,
     maxStage: GrowthStage.FRUITING,
+    turnsWithoutCare: 0, // 初期値は0
   };
 };
 

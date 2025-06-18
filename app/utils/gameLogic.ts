@@ -10,10 +10,14 @@ export const waterPlant = (plant: Plant): Plant => {
   
   // 水が多すぎる場合は健康度が下がる
   if (updatedStats.waterLevel > 90 && plant.requirements.waterNeed < 7) {
-    updatedStats.health = Math.max(0, updatedStats.health - 5);
+    updatedStats.health = Math.max(0, updatedStats.health - 10);
   }
   
-  const updatedPlant = { ...plant, stats: updatedStats };
+  const updatedPlant = { 
+    ...plant, 
+    stats: updatedStats,
+    turnsWithoutCare: 0 // ケアをしたのでリセット
+  };
   updatedPlant.condition = updatePlantCondition(updatedPlant);
   
   return updatedPlant;
@@ -26,10 +30,14 @@ export const fertilizePlant = (plant: Plant): Plant => {
   
   // 肥料が多すぎる場合は健康度が下がる
   if (updatedStats.nutrientLevel > 90 && plant.requirements.nutrientNeed < 7) {
-    updatedStats.health = Math.max(0, updatedStats.health - 5);
+    updatedStats.health = Math.max(0, updatedStats.health - 10);
   }
   
-  const updatedPlant = { ...plant, stats: updatedStats };
+  const updatedPlant = { 
+    ...plant, 
+    stats: updatedStats,
+    turnsWithoutCare: 0 // ケアをしたのでリセット
+  };
   updatedPlant.condition = updatePlantCondition(updatedPlant);
   
   return updatedPlant;
@@ -42,10 +50,14 @@ export const giveSunlight = (plant: Plant): Plant => {
   
   // 日光が多すぎる場合は健康度が下がる
   if (updatedStats.sunlightLevel > 90 && plant.requirements.sunlightNeed < 7) {
-    updatedStats.health = Math.max(0, updatedStats.health - 5);
+    updatedStats.health = Math.max(0, updatedStats.health - 10);
   }
   
-  const updatedPlant = { ...plant, stats: updatedStats };
+  const updatedPlant = { 
+    ...plant, 
+    stats: updatedStats,
+    turnsWithoutCare: 0 // ケアをしたのでリセット
+  };
   updatedPlant.condition = updatePlantCondition(updatedPlant);
   
   return updatedPlant;
@@ -59,8 +71,8 @@ export const harvestPlant = (plant: Plant, player: Player): { plant: Plant | nul
   }
   
   // 収穫による報酬計算
-  const rewardMultiplier = plant.condition === PlantCondition.EXCELLENT ? 2 :
-                          plant.condition === PlantCondition.GOOD ? 1.5 :
+  const rewardMultiplier = plant.condition === PlantCondition.EXCELLENT ? 3 :
+                          plant.condition === PlantCondition.GOOD ? 2 :
                           plant.condition === PlantCondition.NORMAL ? 1 :
                           plant.condition === PlantCondition.POOR ? 0.7 : 0.5;
   
@@ -83,14 +95,16 @@ export const endTurn = (gameState: GameState): GameState => {
   const weatherOptions: ('sunny' | 'cloudy' | 'rainy')[] = ['sunny', 'cloudy', 'rainy'];
   const newWeather = weatherOptions[Math.floor(Math.random() * weatherOptions.length)];
   
-  // ランダムイベントの生成（10%の確率）
+  // ランダムイベントの生成（15%の確率に増加）
   const randomEvents: string[] = [];
-  if (Math.random() < 0.1) {
+  if (Math.random() < 0.15) {
     const possibleEvents = [
       '突然の雨が降り、すべての植物の水分レベルが上昇しました！',
       '強い日差しにより、すべての植物の日光レベルが上昇しました！',
       '害虫の発生により、一部の植物の健康状態が悪化しました。',
-      '肥沃な土壌により、すべての植物の栄養レベルが上昇しました！'
+      '肥沃な土壌により、すべての植物の栄養レベルが上昇しました！',
+      '強風により、植物の健康状態が少し低下しました。',
+      '温暖な気候により、植物の成長が促進されました！'
     ];
     randomEvents.push(possibleEvents[Math.floor(Math.random() * possibleEvents.length)]);
   }
@@ -101,22 +115,35 @@ export const endTurn = (gameState: GameState): GameState => {
     if (randomEvents[0].includes('雨')) {
       processedPlants = processedPlants.map(plant => ({
         ...plant,
-        stats: { ...plant.stats, waterLevel: Math.min(100, plant.stats.waterLevel + 20) }
+        stats: { ...plant.stats, waterLevel: Math.min(100, plant.stats.waterLevel + 25) }
       }));
     } else if (randomEvents[0].includes('日差し')) {
       processedPlants = processedPlants.map(plant => ({
         ...plant,
-        stats: { ...plant.stats, sunlightLevel: Math.min(100, plant.stats.sunlightLevel + 20) }
+        stats: { ...plant.stats, sunlightLevel: Math.min(100, plant.stats.sunlightLevel + 25) }
       }));
     } else if (randomEvents[0].includes('害虫')) {
       processedPlants = processedPlants.map(plant => ({
         ...plant,
-        stats: { ...plant.stats, health: Math.max(0, plant.stats.health - 10) }
+        stats: { ...plant.stats, health: Math.max(0, plant.stats.health - 15) }
       }));
     } else if (randomEvents[0].includes('肥沃')) {
       processedPlants = processedPlants.map(plant => ({
         ...plant,
-        stats: { ...plant.stats, nutrientLevel: Math.min(100, plant.stats.nutrientLevel + 20) }
+        stats: { ...plant.stats, nutrientLevel: Math.min(100, plant.stats.nutrientLevel + 25) }
+      }));
+    } else if (randomEvents[0].includes('強風')) {
+      processedPlants = processedPlants.map(plant => ({
+        ...plant,
+        stats: { ...plant.stats, health: Math.max(0, plant.stats.health - 10) }
+      }));
+    } else if (randomEvents[0].includes('温暖')) {
+      processedPlants = processedPlants.map(plant => ({
+        ...plant,
+        stats: { 
+          ...plant.stats, 
+          growthProgress: Math.min(100, plant.stats.growthProgress + 15)
+        }
       }));
     }
   }
@@ -127,8 +154,8 @@ export const endTurn = (gameState: GameState): GameState => {
       ...plant,
       stats: { 
         ...plant.stats, 
-        waterLevel: Math.min(100, plant.stats.waterLevel + 10),
-        sunlightLevel: Math.max(0, plant.stats.sunlightLevel - 5)
+        waterLevel: Math.min(100, plant.stats.waterLevel + 15),
+        sunlightLevel: Math.max(0, plant.stats.sunlightLevel - 10)
       }
     }));
   } else if (newWeather === 'sunny') {
@@ -136,8 +163,8 @@ export const endTurn = (gameState: GameState): GameState => {
       ...plant,
       stats: { 
         ...plant.stats, 
-        sunlightLevel: Math.min(100, plant.stats.sunlightLevel + 10),
-        waterLevel: Math.max(0, plant.stats.waterLevel - 5)
+        sunlightLevel: Math.min(100, plant.stats.sunlightLevel + 15),
+        waterLevel: Math.max(0, plant.stats.waterLevel - 10)
       }
     }));
   }
@@ -158,24 +185,6 @@ export const endTurn = (gameState: GameState): GameState => {
     randomEvents
   };
   
-  // 熟練の庭師の実績を更新
-  const gardenerAchievement = updatedState.player.achievements.find(a => a.id === 'achievement_gardener');
-  if (gardenerAchievement && !gardenerAchievement.completed) {
-    gardenerAchievement.progress = updatedState.careActionCount || 0;
-    if (gardenerAchievement.progress >= gardenerAchievement.goal) {
-      gardenerAchievement.completed = true;
-    }
-  }
-  
-  // 収穫王の実績を更新
-  const harvestAchievement = updatedState.player.achievements.find(a => a.id === 'achievement_harvest_king');
-  if (harvestAchievement && !harvestAchievement.completed) {
-    harvestAchievement.progress = updatedState.harvestCount || 0;
-    if (harvestAchievement.progress >= harvestAchievement.goal) {
-      harvestAchievement.completed = true;
-    }
-  }
-  
   return updatedState;
 };
 
@@ -190,24 +199,51 @@ const processTurnForPlant = (plant: Plant): Plant => {
   const updatedStats = { ...plant.stats };
   let updatedStage = plant.currentStage;
   
-  // 各ステータスの自然減少
-  updatedStats.waterLevel = Math.max(0, updatedStats.waterLevel - 5);
-  updatedStats.nutrientLevel = Math.max(0, updatedStats.nutrientLevel - 3);
-  updatedStats.sunlightLevel = Math.max(0, updatedStats.sunlightLevel - 4);
+  // ケアなしのターン数を増加
+  const turnsWithoutCare = (plant.turnsWithoutCare || 0) + 1;
   
-  // 条件が悪い場合は健康度が下がる
+  // 各ステータスの自然減少（より急激に減少するように調整）
+  updatedStats.waterLevel = Math.max(0, updatedStats.waterLevel - 8);
+  updatedStats.nutrientLevel = Math.max(0, updatedStats.nutrientLevel - 6);
+  updatedStats.sunlightLevel = Math.max(0, updatedStats.sunlightLevel - 7);
+  
+  // 条件が悪い場合は健康度が下がる（より急激に）
   const waterDiff = Math.abs(updatedStats.waterLevel - plant.requirements.waterNeed * 10);
   const nutrientDiff = Math.abs(updatedStats.nutrientLevel - plant.requirements.nutrientNeed * 10);
   const sunlightDiff = Math.abs(updatedStats.sunlightLevel - plant.requirements.sunlightNeed * 10);
   
   if (waterDiff > 30 || nutrientDiff > 30 || sunlightDiff > 30) {
-    updatedStats.health = Math.max(0, updatedStats.health - 5);
+    updatedStats.health = Math.max(0, updatedStats.health - 10);
   }
   
-  // 条件が良い場合は成長が進む
+  // 3ターン以上ケアがない場合、健康度が急激に低下
+  if (turnsWithoutCare >= 3) {
+    updatedStats.health = Math.max(0, updatedStats.health - 15);
+    console.log(`植物 ${plant.name} は${turnsWithoutCare}ターン世話されていません！健康度が低下しています。`);
+  }
+  
+  // 植物の状態に応じて成長率を変更
+  let growthMultiplier = 1.0;
+  
   if (waterDiff < 20 && nutrientDiff < 20 && sunlightDiff < 20 && updatedStats.health > 50) {
+    // 条件が良い場合は成長が進む
+    // 植物の状態に応じて成長率を変更
+    if (plant.condition === PlantCondition.EXCELLENT) {
+      growthMultiplier = 2.0; // 絶好調なら成長率2倍
+      console.log(`植物 ${plant.name} は絶好調！成長率が2倍になります。`);
+    } else if (plant.condition === PlantCondition.GOOD) {
+      growthMultiplier = 1.5; // 良好なら成長率1.5倍
+      console.log(`植物 ${plant.name} は良好！成長率が1.5倍になります。`);
+    } else if (plant.condition === PlantCondition.POOR) {
+      growthMultiplier = 0.7; // 不調なら成長率0.7倍
+      console.log(`植物 ${plant.name} は不調...成長率が0.7倍になります。`);
+    } else if (plant.condition === PlantCondition.CRITICAL) {
+      growthMultiplier = 0.3; // 危険なら成長率0.3倍
+      console.log(`植物 ${plant.name} は危険な状態！成長率が0.3倍になります。`);
+    }
+    
     // 成長速度を調整 - より速く成長するように
-    updatedStats.growthProgress += plant.requirements.growthRate * 5;
+    updatedStats.growthProgress += plant.requirements.growthRate * 10 * growthMultiplier;
     console.log(`植物 ${plant.name} の成長進捗: ${updatedStats.growthProgress}%`);
   }
   
@@ -245,12 +281,26 @@ const processTurnForPlant = (plant: Plant): Plant => {
     console.log(`植物 ${plant.name} の新しい成長段階: ${updatedStage}`);
   }
   
+  // 健康度が0になると植物が枯れる
+  if (updatedStats.health <= 0) {
+    console.log(`植物 ${plant.name} が枯れてしまいました...`);
+    return {
+      ...plant,
+      stats: updatedStats,
+      currentStage: updatedStage,
+      turnsAlive: plant.turnsAlive + 1,
+      turnsWithoutCare: turnsWithoutCare,
+      condition: PlantCondition.DEAD
+    };
+  }
+  
   // 更新された植物を返す
   const updatedPlant = {
     ...plant,
     stats: updatedStats,
     currentStage: updatedStage,
     turnsAlive: plant.turnsAlive + 1,
+    turnsWithoutCare: turnsWithoutCare,
   };
   
   // 条件の更新
