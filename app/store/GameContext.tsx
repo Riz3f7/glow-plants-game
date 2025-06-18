@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { GameState, createInitialGameState } from '../models/Game';
+import { GameState, createInitialGameState, GameItem } from '../models/Game';
 import { Plant } from '../models/Plant';
 import { waterPlant, fertilizePlant, giveSunlight, harvestPlant, endTurn } from '../utils/gameLogic';
 import { initialPlants, initialItems, initialAchievements } from '../utils/initialData';
