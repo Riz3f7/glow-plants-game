@@ -356,7 +356,22 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       
       // 実績をチェック
       if (state.plants.length === 0) {
-        updatedState = checkAchievement(updatedState, 'achievement_first_plant');
+        // 最初の植物を育て始めた実績
+        const achievement = state.achievements.find(a => a.id === 'achievement_first_plant');
+        if (achievement && !achievement.completed) {
+          updatedState = {
+            ...updatedState,
+            achievements: updatedState.achievements.map(a => 
+              a.id === 'achievement_first_plant' 
+                ? { ...a, progress: a.progress + 1, completed: a.progress + 1 >= a.goal }
+                : a
+            ),
+            eventMessages: [
+              ...updatedState.eventMessages,
+              `🏆 実績解除: ${achievement.name}`
+            ]
+          };
+        }
       }
       
       return updatedState;
