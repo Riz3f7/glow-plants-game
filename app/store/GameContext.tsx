@@ -374,11 +374,28 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         };
       }
       
+      // アイテムを追加する関数
+      const addItemToInventory = (inventory: GameItem[], newItem: GameItem) => {
+        const existingItemIndex = inventory.findIndex(i => i.id === newItem.id);
+        if (existingItemIndex >= 0) {
+          // 既存のアイテムがある場合は数量を増やす
+          const updatedInventory = [...inventory];
+          updatedInventory[existingItemIndex] = {
+            ...updatedInventory[existingItemIndex],
+            quantity: updatedInventory[existingItemIndex].quantity + newItem.quantity
+          };
+          return updatedInventory;
+        } else {
+          // 新しいアイテムを追加
+          return [...inventory, newItem];
+        }
+      };
+      
       // プレイヤーの所持金を減らす
       const updatedPlayer = {
         ...state.player,
         currency: state.player.currency - item.price,
-        inventory: addItem(state.player, { ...item, quantity: 1 }).inventory
+        inventory: addItemToInventory(state.player.inventory, { ...item, quantity: 1 })
       };
       
       return {
