@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useGameContext } from '../store/GameContext';
 
 interface SpecialEffectsProps {
   type: 'harvest' | 'dead';
@@ -14,30 +13,9 @@ const SpecialEffects: React.FC<SpecialEffectsProps> = ({ type, message, onComple
   const [animationClass, setAnimationClass] = useState('');
   const [particles, setParticles] = useState<JSX.Element[]>([]);
 
-  useEffect(() => {
-    // アニメーション開始
-    setAnimationClass('animate-in');
-    
-    // パーティクルを生成
-    setParticles(generateParticles());
-    
-    // 5秒後にアニメーション終了
-    const timer = setTimeout(() => {
-      setAnimationClass('animate-out');
-      setTimeout(() => {
-        setVisible(false);
-        if (onComplete) onComplete();
-      }, 1000); // アニメーション終了後に非表示
-    }, 5000);
-    
-    return () => clearTimeout(timer);
-  }, [onComplete]);
-  
-  if (!visible) return null;
-  
   // パーティクルを生成する関数
-  function generateParticles() {
-    const particleElements = [];
+  const generateParticles = (): JSX.Element[] => {
+    const particleElements: JSX.Element[] = [];
     const count = type === 'harvest' ? 30 : 20;
     const icons = type === 'harvest' 
       ? ['🍎', '✨', '🌟', '🎉', '🌱', '🌿', '🍀'] 
@@ -70,7 +48,28 @@ const SpecialEffects: React.FC<SpecialEffectsProps> = ({ type, message, onComple
     }
     
     return particleElements;
-  }
+  };
+
+  useEffect(() => {
+    // アニメーション開始
+    setAnimationClass('animate-in');
+    
+    // パーティクルを生成
+    setParticles(generateParticles());
+    
+    // 5秒後にアニメーション終了
+    const timer = setTimeout(() => {
+      setAnimationClass('animate-out');
+      setTimeout(() => {
+        setVisible(false);
+        if (onComplete) onComplete();
+      }, 1000); // アニメーション終了後に非表示
+    }, 5000);
+    
+    return () => clearTimeout(timer);
+  }, [onComplete, generateParticles]);
+  
+  if (!visible) return null;
   
   const getBackgroundColor = () => {
     switch (type) {

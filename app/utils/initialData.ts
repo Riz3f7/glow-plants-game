@@ -1,6 +1,6 @@
 // initialData.ts - ゲームの初期データ
 
-import { Plant, createNewPlant, GrowthStage } from '../models/Plant';
+import { Plant, createNewPlant } from '../models/Plant';
 import { GameItem, Achievement } from '../models/Game';
 
 // 植物の難易度を追加
