@@ -33,8 +33,6 @@ const Achievements: React.FC<AchievementsProps> = ({ achievements }) => {
         return '⭐';
       case 'item':
         return '🎁';
-      case 'plant':
-        return '🌱';
       default:
         return '🎁';
     }
