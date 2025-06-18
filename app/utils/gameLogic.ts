@@ -80,7 +80,7 @@ export const harvestPlant = (plant: Plant, player: Player): { plant: Plant | nul
   const currencyReward = Math.floor(30 * rewardMultiplier);
   
   // 経験値と通貨を追加
-  let updatedPlayer = addExperience(player, experienceReward);
+  const updatedPlayer = addExperience(player, experienceReward);
   updatedPlayer.currency += currencyReward;
   
   // 収穫後は植物がなくなる

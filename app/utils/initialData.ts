@@ -1,6 +1,6 @@
 // initialData.ts - ゲームの初期データ
 
-import { Plant, GrowthStage, createNewPlant } from '../models/Plant';
+import { Plant, createNewPlant } from '../models/Plant';
 import { GameItem, Achievement } from '../models/Game';
 
 // 初期植物データ

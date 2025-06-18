@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./amplify-config";
+import { M_PLUS_Rounded_1c } from 'next/font/google';
+
+// フォントの設定
+const mPlusRounded1c = M_PLUS_Rounded_1c({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '700'],
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: "植物育成ゲーム",
@@ -13,15 +21,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja">
+    <html lang="ja" className={mPlusRounded1c.className}>
       <head>
-        <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@300;400;500;700&display=swap" rel="stylesheet" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
       <body style={{ 
         margin: 0, 
         padding: 0, 
-        fontFamily: "'M PLUS Rounded 1c', sans-serif",
         backgroundColor: '#f0f8ff'
       }}>
         <div className="game-container">

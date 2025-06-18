@@ -137,7 +137,7 @@ export const addCurrency = (player: Player, amount: number): Player => {
 
 // プレイヤーに経験値を追加する関数
 export const addExperience = (player: Player, amount: number): Player => {
-  let updatedPlayer = { ...player };
+  const updatedPlayer = { ...player };
   updatedPlayer.experience += amount;
   
   // レベルアップの処理

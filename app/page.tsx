@@ -1,10 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
 import { GameProvider, useGameContext } from './store/GameContext';
 import { Plant } from './models/Plant';
-import Button from './components/Button';
 import PlantCard from './components/PlantCard';
 import GameInfo from './components/GameInfo';
 import GameInfoCompact from './components/GameInfoCompact';
