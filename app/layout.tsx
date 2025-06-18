@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./amplify-config";
 
 export const metadata: Metadata = {
   title: "植物育成ゲーム",
