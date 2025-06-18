@@ -266,7 +266,7 @@ const processTurnForPlant = (plant: Plant): Plant => {
   }
   
   // 成長段階の更新
-  let growthMessage = null;
+  let growthMessage: string | undefined = undefined;
   if (updatedStats.growthProgress >= 100) {
     console.log(`植物 ${plant.name} の成長段階を更新します。現在の段階: ${updatedStage}`);
     
