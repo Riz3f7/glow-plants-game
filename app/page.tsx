@@ -13,6 +13,7 @@ import PlantCollection from './components/PlantCollection';
 import Achievements from './components/Achievements';
 import EventMessages from './components/EventMessages';
 import GameOver from './components/GameOver';
+import SpecialEffects from './components/SpecialEffects';
 
 // ゲームの状態
 type GameScreen = 'title' | 'garden' | 'shop' | 'collection' | 'achievements';
@@ -365,6 +366,15 @@ const GameScreen: React.FC = () => {
       
       {/* イベントメッセージ表示 */}
       <EventMessages />
+      
+      {/* 特殊効果表示 */}
+      {state.specialEffect && (
+        <SpecialEffects
+          type={state.specialEffect.type}
+          message={state.specialEffect.message}
+          onComplete={() => dispatch({ type: 'CLEAR_SPECIAL_EFFECT' })}
+        />
+      )}
       
       {/* ゲーム終了時の表示 */}
       {state.isGameOver && <GameOver onRestart={handleRestart} />}

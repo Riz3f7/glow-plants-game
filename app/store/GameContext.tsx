@@ -19,7 +19,8 @@ type GameAction =
   | { type: 'BUY_ITEM'; itemId: string }
   | { type: 'USE_ITEM'; itemId: string; plantId: string }
   | { type: 'COMPLETE_ACHIEVEMENT'; achievementId: string }
-  | { type: 'CLEAR_EVENT_MESSAGES' };
+  | { type: 'CLEAR_EVENT_MESSAGES' }
+  | { type: 'CLEAR_SPECIAL_EFFECT' };
 
 // コンテキストの型定義
 interface GameContextType {
@@ -81,7 +82,11 @@ const checkDeadPlants = (state: GameState): GameState => {
     return {
       ...state,
       plants: [], // 植物をクリア
-      eventMessages: [...state.eventMessages, `🌱 新しい植物を選んでください`]
+      eventMessages: [...state.eventMessages, `🌱 新しい植物を選んでください`],
+      specialEffect: {
+        type: 'dead',
+        message: `${deadPlants[0].name}が枯れてしまいました...`
+      }
     };
   }
   return state;
@@ -207,7 +212,11 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
             player: updatedPlayer,
             actionsRemaining: state.actionsRemaining - 1,
             harvestCount: (state.harvestCount || 0) + 1, // 収穫カウントを追加
-            eventMessages: newEventMessages
+            eventMessages: newEventMessages,
+            specialEffect: {
+              type: 'harvest',
+              message: `🎉 ${harvestedPlant.name}を収穫しました！ 🎉`
+            }
           };
           
           // 実績の更新
@@ -220,7 +229,11 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
           player: updatedPlayer,
           actionsRemaining: state.actionsRemaining - 1,
           harvestCount: (state.harvestCount || 0) + 1, // 収穫カウントを追加
-          eventMessages: newEventMessages
+          eventMessages: newEventMessages,
+          specialEffect: {
+            type: 'harvest',
+            message: `🎉 ${harvestedPlant.name}を収穫しました！ 🎉`
+          }
         };
         
         // 実績の更新
@@ -315,10 +328,132 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       return updateAchievements(updatedState);
     }
     
+    case 'BUY_ITEM': {
+      // ショップからアイテムを購入
+      const itemId = action.itemId;
+      const item = state.shopItems.find(i => i.id === itemId);
+      
+      // アイテムが見つからない場合は何もしない
+      if (!item) return state;
+      
+      // プレイヤーの所持金が足りない場合は何もしない
+      if (state.player.currency < item.price) {
+        return {
+          ...state,
+          eventMessages: [...state.eventMessages, `💰 所持金が足りません！`]
+        };
+      }
+      
+      // プレイヤーの所持金を減らす
+      const updatedPlayer = {
+        ...state.player,
+        currency: state.player.currency - item.price,
+        inventory: addItem(state.player, { ...item, quantity: 1 }).inventory
+      };
+      
+      return {
+        ...state,
+        player: updatedPlayer,
+        eventMessages: [...state.eventMessages, `🛒 ${item.name}を購入しました！`]
+      };
+    }
+    
+    case 'USE_ITEM': {
+      // インベントリからアイテムを使用
+      const { itemId, plantId } = action;
+      
+      // アイテムとプラントを検索
+      const itemIndex = state.player.inventory.findIndex(i => i.id === itemId);
+      const plantIndex = state.plants.findIndex(p => p.id === plantId);
+      
+      // アイテムまたはプラントが見つからない場合は何もしない
+      if (itemIndex < 0 || plantIndex < 0) return state;
+      
+      const item = state.player.inventory[itemIndex];
+      const plant = state.plants[plantIndex];
+      
+      // アイテムの数量が0以下の場合は何もしない
+      if (item.quantity <= 0) {
+        return {
+          ...state,
+          eventMessages: [...state.eventMessages, `❌ ${item.name}の在庫がありません！`]
+        };
+      }
+      
+      // アイテムの効果を適用
+      let updatedPlant = { ...plant };
+      const updatedStats = { ...plant.stats };
+      
+      switch (item.effect.type) {
+        case 'water':
+          updatedStats.waterLevel = Math.min(100, updatedStats.waterLevel + item.effect.value);
+          break;
+        case 'nutrient':
+          updatedStats.nutrientLevel = Math.min(100, updatedStats.nutrientLevel + item.effect.value);
+          break;
+        case 'sunlight':
+          updatedStats.sunlightLevel = Math.min(100, updatedStats.sunlightLevel + item.effect.value);
+          break;
+        case 'health':
+          updatedStats.health = Math.min(100, updatedStats.health + item.effect.value);
+          break;
+        case 'growth':
+          updatedStats.growthProgress = Math.min(100, updatedStats.growthProgress + item.effect.value);
+          break;
+      }
+      
+      updatedPlant = {
+        ...updatedPlant,
+        stats: updatedStats,
+        turnsWithoutCare: 0 // アイテムを使用したのでケアをリセット
+      };
+      
+      // 植物の状態を更新
+      updatedPlant.condition = updatePlantCondition(updatedPlant);
+      
+      // アイテムの数量を減らす
+      const updatedInventory = [...state.player.inventory];
+      updatedInventory[itemIndex] = {
+        ...item,
+        quantity: item.quantity - 1
+      };
+      
+      // 数量が0になったアイテムを削除
+      const filteredInventory = updatedInventory.filter(i => i.quantity > 0);
+      
+      const updatedPlayer = {
+        ...state.player,
+        inventory: filteredInventory
+      };
+      
+      const updatedPlants = [...state.plants];
+      updatedPlants[plantIndex] = updatedPlant;
+      
+      updatedState = {
+        ...state,
+        plants: updatedPlants,
+        player: updatedPlayer,
+        eventMessages: [...state.eventMessages, `✨ ${plant.name}に${item.name}を使用しました！`]
+      };
+      
+      // 植物が枯れているかチェック
+      updatedState = checkDeadPlants(updatedState);
+      
+      // 実績の更新
+      return updateAchievements(updatedState);
+    }
+    
     case 'CLEAR_EVENT_MESSAGES': {
       return {
         ...state,
         eventMessages: []
+      };
+    }
+    
+    case 'CLEAR_SPECIAL_EFFECT': {
+      return {
+        ...state,
+        specialEffect: undefined
       };
     }
     
