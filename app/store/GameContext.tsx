@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { GameState, createInitialGameState, GameItem } from '../models/Game';
-import { Plant } from '../models/Plant';
+import { Plant, PlantCondition } from '../models/Plant';
 import { waterPlant, fertilizePlant, giveSunlight, harvestPlant, endTurn } from '../utils/gameLogic';
 import { initialPlants, initialItems, initialAchievements } from '../utils/initialData';
 
@@ -456,6 +456,16 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       };
       
       // 植物の状態を更新
+      const updatePlantCondition = (plant: Plant) => {
+        const { health } = plant.stats;
+        if (health <= 0) return PlantCondition.DEAD;
+        if (health < 20) return PlantCondition.CRITICAL;
+        if (health < 40) return PlantCondition.POOR;
+        if (health < 60) return PlantCondition.NORMAL;
+        if (health < 80) return PlantCondition.GOOD;
+        return PlantCondition.EXCELLENT;
+      };
+      
       updatedPlant.condition = updatePlantCondition(updatedPlant);
       
       // アイテムの数量を減らす
