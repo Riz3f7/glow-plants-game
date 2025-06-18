@@ -24,7 +24,7 @@ export interface Achievement {
   progress: number;
   completed: boolean;
   reward: {
-    type: 'currency' | 'experience' | 'item';
+    type: 'currency' | 'experience' | 'item' | 'plant';
     value: number;
     itemId?: string;
   };
