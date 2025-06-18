@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, ReactElement } from 'react';
 
 interface SpecialEffectsProps {
   type: 'harvest' | 'dead';
@@ -11,11 +11,11 @@ interface SpecialEffectsProps {
 const SpecialEffects: React.FC<SpecialEffectsProps> = ({ type, message, onComplete }) => {
   const [visible, setVisible] = useState(true);
   const [animationClass, setAnimationClass] = useState('');
-  const [particles, setParticles] = useState<JSX.Element[]>([]);
+  const [particles, setParticles] = useState<ReactElement[]>([]);
 
   // パーティクルを生成する関数
   const generateParticles = useCallback(() => {
-    const particleElements: JSX.Element[] = [];
+    const particleElements: ReactElement[] = [];
     const count = type === 'harvest' ? 30 : 20;
     const icons = type === 'harvest' 
       ? ['🍎', '✨', '🌟', '🎉', '🌱', '🌿', '🍀'] 
