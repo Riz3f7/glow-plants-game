@@ -49,6 +49,10 @@ export interface Plant {
   maxStage: GrowthStage;
   turnsWithoutCare?: number; // ケアなしのターン数を追加
   growthMessage?: string;    // 成長メッセージを追加
+  specialEffect?: {          // 特殊効果を追加
+    type: 'harvest' | 'dead';
+    message: string;
+  };
 }
 
 // 植物の初期データを生成する関数

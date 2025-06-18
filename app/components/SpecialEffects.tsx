@@ -12,10 +12,14 @@ interface SpecialEffectsProps {
 const SpecialEffects: React.FC<SpecialEffectsProps> = ({ type, message, onComplete }) => {
   const [visible, setVisible] = useState(true);
   const [animationClass, setAnimationClass] = useState('');
+  const [particles, setParticles] = useState<JSX.Element[]>([]);
 
   useEffect(() => {
     // アニメーション開始
     setAnimationClass('animate-in');
+    
+    // パーティクルを生成
+    setParticles(generateParticles());
     
     // 5秒後にアニメーション終了
     const timer = setTimeout(() => {
@@ -30,6 +34,43 @@ const SpecialEffects: React.FC<SpecialEffectsProps> = ({ type, message, onComple
   }, [onComplete]);
   
   if (!visible) return null;
+  
+  // パーティクルを生成する関数
+  function generateParticles() {
+    const particleElements = [];
+    const count = type === 'harvest' ? 30 : 20;
+    const icons = type === 'harvest' 
+      ? ['🍎', '✨', '🌟', '🎉', '🌱', '🌿', '🍀'] 
+      : ['💀', '⚰️', '🥀', '☠️', '😭', '💔'];
+    
+    for (let i = 0; i < count; i++) {
+      const randomIcon = icons[Math.floor(Math.random() * icons.length)];
+      const delay = Math.random() * 2;
+      const duration = 2 + Math.random() * 3;
+      const size = 20 + Math.random() * 30;
+      const left = Math.random() * 100;
+      const rotation = Math.random() * 360;
+      
+      particleElements.push(
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            left: `${left}%`,
+            top: '50%',
+            fontSize: `${size}px`,
+            opacity: 0,
+            transform: `rotate(${rotation}deg)`,
+            animation: `float ${duration}s ease-out ${delay}s forwards`
+          }}
+        >
+          {randomIcon}
+        </div>
+      );
+    }
+    
+    return particleElements;
+  }
   
   const getBackgroundColor = () => {
     switch (type) {
@@ -51,41 +92,6 @@ const SpecialEffects: React.FC<SpecialEffectsProps> = ({ type, message, onComple
       default:
         return '⚠️';
     }
-  };
-  
-  const getParticles = () => {
-    const particles = [];
-    const count = type === 'harvest' ? 30 : 20;
-    const icons = type === 'harvest' ? ['🍎', '✨', '🌟', '🎉'] : ['💀', '⚰️', '🥀', '☠️'];
-    
-    for (let i = 0; i < count; i++) {
-      const randomIcon = icons[Math.floor(Math.random() * icons.length)];
-      const delay = Math.random() * 2;
-      const duration = 2 + Math.random() * 3;
-      const size = 20 + Math.random() * 30;
-      const left = Math.random() * 100;
-      const rotation = Math.random() * 360;
-      
-      particles.push(
-        <div
-          key={i}
-          className="particle"
-          style={{
-            position: 'absolute',
-            left: `${left}%`,
-            top: '50%',
-            fontSize: `${size}px`,
-            opacity: 0,
-            transform: `rotate(${rotation}deg)`,
-            animation: `float ${duration}s ease-out ${delay}s forwards`
-          }}
-        >
-          {randomIcon}
-        </div>
-      );
-    }
-    
-    return particles;
   };
   
   return (
@@ -141,24 +147,39 @@ const SpecialEffects: React.FC<SpecialEffectsProps> = ({ type, message, onComple
         .icon-pulse {
           animation: pulse 1s infinite;
         }
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+          20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+        .shake {
+          animation: shake 0.5s infinite;
+        }
       `}</style>
       
-      <div className="icon-pulse" style={{ fontSize: '80px', marginBottom: '20px' }}>
+      <div 
+        className={type === 'dead' ? 'shake' : 'icon-pulse'} 
+        style={{ 
+          fontSize: '100px', 
+          marginBottom: '20px',
+          textShadow: '0 0 20px rgba(255,255,255,0.7)'
+        }}
+      >
         {getIcon()}
       </div>
       
       <h2 style={{
-        fontSize: '32px',
+        fontSize: '36px',
         fontWeight: 'bold',
         color: 'white',
         textAlign: 'center',
         marginBottom: '20px',
-        textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+        textShadow: '0 2px 10px rgba(0,0,0,0.7)'
       }}>
         {message}
       </h2>
       
-      {getParticles()}
+      {particles}
     </div>
   );
 };

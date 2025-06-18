@@ -77,17 +77,30 @@ const updateAchievements = (state: GameState): GameState => {
 // 植物が枯れているかチェックする関数
 const checkDeadPlants = (state: GameState): GameState => {
   const deadPlants = state.plants.filter(plant => plant.condition === 'dead');
-  if (deadPlants.length > 0 && state.plants.length === deadPlants.length) {
-    // すべての植物が枯れている場合、植物を削除して新しい植物を選択できるようにする
-    return {
-      ...state,
-      plants: [], // 植物をクリア
-      eventMessages: [...state.eventMessages, `🌱 新しい植物を選んでください`],
-      specialEffect: {
-        type: 'dead',
-        message: `${deadPlants[0].name}が枯れてしまいました...`
-      }
-    };
+  if (deadPlants.length > 0) {
+    // 枯れた植物がある場合
+    if (state.plants.length === deadPlants.length) {
+      // すべての植物が枯れている場合、植物を削除して新しい植物を選択できるようにする
+      return {
+        ...state,
+        plants: [], // 植物をクリア
+        eventMessages: [...state.eventMessages, `💀 ${deadPlants[0].name}が枯れてしまいました...`, `🌱 新しい植物を選んでください`],
+        specialEffect: {
+          type: 'dead',
+          message: `${deadPlants[0].name}が枯れてしまいました...`
+        }
+      };
+    } else {
+      // 一部の植物が枯れている場合、特殊効果だけ設定
+      return {
+        ...state,
+        eventMessages: [...state.eventMessages, `💀 ${deadPlants[0].name}が枯れてしまいました...`],
+        specialEffect: {
+          type: 'dead',
+          message: `${deadPlants[0].name}が枯れてしまいました...`
+        }
+      };
+    }
   }
   return state;
 };
@@ -287,13 +300,30 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       
       // 植物が枯れているかチェック
       const deadPlants = updatedState.plants.filter(plant => plant.condition === 'dead');
-      if (deadPlants.length > 0 && updatedState.plants.length === deadPlants.length) {
-        // すべての植物が枯れている場合、植物を削除して新しい植物を選択できるようにする
-        updatedState = {
-          ...updatedState,
-          plants: [], // 植物をクリア
-          eventMessages: [...updatedState.eventMessages, `🌱 新しい植物を選んでください`]
-        };
+      if (deadPlants.length > 0) {
+        // 枯れた植物がある場合
+        if (updatedState.plants.length === deadPlants.length) {
+          // すべての植物が枯れている場合、植物を削除して新しい植物を選択できるようにする
+          updatedState = {
+            ...updatedState,
+            plants: [], // 植物をクリア
+            eventMessages: [...updatedState.eventMessages, `💀 ${deadPlants[0].name}が枯れてしまいました...`, `🌱 新しい植物を選んでください`],
+            specialEffect: {
+              type: 'dead',
+              message: `${deadPlants[0].name}が枯れてしまいました...`
+            }
+          };
+        } else {
+          // 一部の植物が枯れている場合、特殊効果だけ設定
+          updatedState = {
+            ...updatedState,
+            eventMessages: [...updatedState.eventMessages, `💀 ${deadPlants[0].name}が枯れてしまいました...`],
+            specialEffect: {
+              type: 'dead',
+              message: `${deadPlants[0].name}が枯れてしまいました...`
+            }
+          };
+        }
       }
       
       // ランダムイベントをイベントメッセージに追加
