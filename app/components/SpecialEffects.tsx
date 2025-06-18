@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 interface SpecialEffectsProps {
   type: 'harvest' | 'dead';
@@ -14,7 +14,7 @@ const SpecialEffects: React.FC<SpecialEffectsProps> = ({ type, message, onComple
   const [particles, setParticles] = useState<JSX.Element[]>([]);
 
   // パーティクルを生成する関数
-  const generateParticles = (): JSX.Element[] => {
+  const generateParticles = useCallback(() => {
     const particleElements: JSX.Element[] = [];
     const count = type === 'harvest' ? 30 : 20;
     const icons = type === 'harvest' 
@@ -48,7 +48,7 @@ const SpecialEffects: React.FC<SpecialEffectsProps> = ({ type, message, onComple
     }
     
     return particleElements;
-  };
+  }, [type]);
 
   useEffect(() => {
     // アニメーション開始
