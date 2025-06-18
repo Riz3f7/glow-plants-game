@@ -55,15 +55,19 @@ export interface GameState {
   harvestCount?: number; // 収穫した回数
   eventMessages: string[]; // イベントメッセージを追加
   isGameOver?: boolean;   // ゲーム終了フラグを追加
+  specialEffect?: {
+    type: 'harvest' | 'dead';
+    message: string;
+  };
 }
 
 // 初期ゲーム状態を作成する関数
 export const createInitialGameState = (): GameState => {
   return {
     currentTurn: 1,
-    maxTurns: 20, // 最大ターン数を設定
-    actionsPerTurn: 3, // 1ターンあたりのアクション数を減らす（デフォルトは5）
-    actionsRemaining: 3,
+    maxTurns: 15, // 最大ターン数を15に減らす
+    actionsPerTurn: 2, // 1ターンあたりのアクション数を2に減らす
+    actionsRemaining: 2,
     plants: [],
     availablePlants: [],
     discoveredPlants: [],
@@ -81,7 +85,8 @@ export const createInitialGameState = (): GameState => {
     careActionCount: 0,
     harvestCount: 0,
     eventMessages: [],
-    isGameOver: false
+    isGameOver: false,
+    specialEffect: undefined
   };
 };
 

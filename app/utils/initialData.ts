@@ -1,79 +1,111 @@
 // initialData.ts - ゲームの初期データ
 
-import { Plant, createNewPlant } from '../models/Plant';
+import { Plant, createNewPlant, GrowthStage } from '../models/Plant';
 import { GameItem, Achievement } from '../models/Game';
 
+// 植物の難易度を追加
+interface PlantWithDifficulty extends Plant {
+  difficulty: 'easy' | 'medium' | 'hard' | 'expert';
+}
+
+// 難易度付きの植物を作成する関数
+const createPlantWithDifficulty = (
+  id: string,
+  name: string,
+  species: string,
+  description: string,
+  requirements: {
+    waterNeed: number;
+    sunlightNeed: number;
+    nutrientNeed: number;
+    growthRate: number;
+    turnsToNextStage: number;
+  },
+  imageUrl: string,
+  difficulty: 'easy' | 'medium' | 'hard' | 'expert'
+): PlantWithDifficulty => {
+  return {
+    ...createNewPlant(id, name, species, description, requirements, imageUrl),
+    difficulty
+  };
+};
+
 // 初期植物データ
-export const initialPlants: Plant[] = [
-  createNewPlant(
+export const initialPlants: PlantWithDifficulty[] = [
+  createPlantWithDifficulty(
     'plant_1',
     'サニーフラワー',
     'Helianthus simplex',
-    'とても明るい場所を好む、太陽の光をたくさん浴びると元気に育つ花です。',
+    'とても明るい場所を好む、太陽の光をたくさん浴びると元気に育つ花です。初心者向けの育てやすい植物です。',
     {
       waterNeed: 5,
-      sunlightNeed: 9,
+      sunlightNeed: 8,
       nutrientNeed: 4,
-      growthRate: 5,
-      turnsToNextStage: 3,
+      growthRate: 6,
+      turnsToNextStage: 2,
     },
-    '/assets/images/output/output/sunnyflower_mature.png'
+    '/assets/images/output/output/sunnyflower_mature.png',
+    'easy'
   ),
-  createNewPlant(
+  createPlantWithDifficulty(
     'plant_2',
     'モイストファーン',
     'Pteridophyta aqua',
-    '湿度の高い環境を好む、水をたくさん与えると元気に育つシダ植物です。',
+    '湿度の高い環境を好む、水をたくさん与えると元気に育つシダ植物です。中級者向けの植物です。',
     {
       waterNeed: 9,
       sunlightNeed: 3,
       nutrientNeed: 5,
       growthRate: 4,
-      turnsToNextStage: 4,
+      turnsToNextStage: 3,
     },
-    '/assets/images/output/output/moistfern_mature.png'
+    '/assets/images/output/output/moistfern_mature.png',
+    'medium'
   ),
-  createNewPlant(
+  createPlantWithDifficulty(
     'plant_3',
     'ニュートリブッシュ',
     'Nutriens maxima',
-    '栄養豊富な土壌を好む、肥料をたくさん与えると元気に育つ低木です。',
+    '栄養豊富な土壌を好む、肥料をたくさん与えると元気に育つ低木です。上級者向けの植物です。',
     {
       waterNeed: 4,
       sunlightNeed: 6,
       nutrientNeed: 9,
       growthRate: 3,
-      turnsToNextStage: 5,
+      turnsToNextStage: 4,
     },
-    '/assets/images/output/output/nutribush_mature.png'
+    '/assets/images/output/output/nutribush_mature.png',
+    'hard'
   ),
-  createNewPlant(
+  createPlantWithDifficulty(
     'plant_4',
     'ムーンリリー',
     'Lilium lunaris',
-    '夜に美しく輝く、涼しい環境を好む神秘的な花です。',
+    '夜に美しく輝く、涼しい環境を好む神秘的な花です。中級者向けの植物です。',
     {
       waterNeed: 7,
       sunlightNeed: 2,
       nutrientNeed: 6,
       growthRate: 3,
-      turnsToNextStage: 4,
+      turnsToNextStage: 3,
     },
-    '/assets/images/output/output/moonlily_mature.png'
+    '/assets/images/output/output/moonlily_mature.png',
+    'medium'
   ),
-  createNewPlant(
+  createPlantWithDifficulty(
     'plant_5',
     'ファイアペタル',
     'Ignis floris',
-    '暑い環境を好み、鮮やかな炎のような花を咲かせる珍しい植物です。',
+    '暑い環境を好み、鮮やかな炎のような花を咲かせる珍しい植物です。エキスパート向けの非常に育てるのが難しい植物です。',
     {
       waterNeed: 3,
       sunlightNeed: 10,
       nutrientNeed: 7,
-      growthRate: 6,
-      turnsToNextStage: 3,
+      growthRate: 2,
+      turnsToNextStage: 5,
     },
-    '/assets/images/output/output/firepetal_mature.png'
+    '/assets/images/output/output/firepetal_mature.png',
+    'expert'
   ),
 ];
 
@@ -142,7 +174,7 @@ export const initialItems: GameItem[] = [
     },
     quantity: 0,
     price: 50,
-    unlocked: false,
+    unlocked: true,
   },
   {
     id: 'item_premium_water',
@@ -155,7 +187,7 @@ export const initialItems: GameItem[] = [
     },
     quantity: 0,
     price: 40,
-    unlocked: false,
+    unlocked: true,
   },
   {
     id: 'item_super_fertilizer',
@@ -168,7 +200,7 @@ export const initialItems: GameItem[] = [
     },
     quantity: 0,
     price: 45,
-    unlocked: false,
+    unlocked: true,
   },
   {
     id: 'item_growth_miracle',
@@ -181,7 +213,7 @@ export const initialItems: GameItem[] = [
     },
     quantity: 0,
     price: 100,
-    unlocked: false,
+    unlocked: true,
   },
 ];
 
