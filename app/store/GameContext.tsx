@@ -354,6 +354,34 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         eventMessages: [...state.eventMessages, `🌱 ${newPlant.name}を植えました！`]
       };
       
+      // 実績をチェック
+      if (state.plants.length === 0) {
+        updatedState = checkAchievement(updatedState, 'achievement_first_plant');
+      }
+      
+      return updatedState;
+    }
+    
+    case 'REMOVE_PLANT': {
+      // 植物を削除
+      const plantId = action.plantId;
+      const plantToRemove = state.plants.find(p => p.id === plantId);
+      
+      if (!plantToRemove) {
+        return state;
+      }
+      
+      return {
+        ...state,
+        plants: state.plants.filter(p => p.id !== plantId),
+        eventMessages: [...state.eventMessages, `🗑️ ${plantToRemove.name}の育成をやめました`],
+        specialEffect: {
+          type: 'dead',
+          message: `${plantToRemove.name}の育成をやめました`,
+        },
+      };
+    }
+      
       // 実績の更新
       return updateAchievements(updatedState);
     }

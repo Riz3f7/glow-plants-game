@@ -278,6 +278,7 @@ const GameScreen: React.FC = () => {
                           onFertilize={() => dispatch({ type: 'FERTILIZE_PLANT', plantId: plant.id })}
                           onSunlight={() => dispatch({ type: 'GIVE_SUNLIGHT', plantId: plant.id })}
                           onHarvest={() => dispatch({ type: 'HARVEST_PLANT', plantId: plant.id })}
+                          onAbandon={() => dispatch({ type: 'REMOVE_PLANT', plantId: plant.id })}
                           actionsRemaining={state.actionsRemaining}
                         />
                       </div>

@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { Plant, GrowthStage, PlantCondition } from '../models/Plant';
+import ConfirmDialog from './ConfirmDialog';
 
 interface PlantCardProps {
   plant: Plant;
@@ -10,6 +11,7 @@ interface PlantCardProps {
   onFertilize: () => void;
   onSunlight: () => void;
   onHarvest: () => void;
+  onAbandon: () => void;
   actionsRemaining: number;
 }
 
@@ -19,8 +21,12 @@ const PlantCard: React.FC<PlantCardProps> = ({
   onFertilize,
   onSunlight,
   onHarvest,
+  onAbandon,
   actionsRemaining,
 }) => {
+  // 確認ダイアログの状態
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  
   // 収穫可能かどうか
   const canHarvest = plant.currentStage === GrowthStage.FRUITING;
   
@@ -526,7 +532,43 @@ const PlantCard: React.FC<PlantCardProps> = ({
           <span style={{ marginRight: '5px' }}>🍎</span>
           収穫
         </button>
+        
+        {/* 育成をやめるボタン */}
+        <button
+          onClick={() => setShowConfirmDialog(true)}
+          style={{
+            backgroundColor: '#9e9e9e',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            padding: '8px 0',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginTop: '10px',
+            width: '100%',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+          }}
+        >
+          <span style={{ marginRight: '5px' }}>🗑️</span>
+          育成をやめる
+        </button>
       </div>
+      
+      {/* 確認ダイアログ */}
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        title="育成をやめますか？"
+        message={`${plant.name}の育成をやめると、この植物は失われます。この操作は取り消せません。`}
+        onConfirm={() => {
+          setShowConfirmDialog(false);
+          onAbandon();
+        }}
+        onCancel={() => setShowConfirmDialog(false)}
+      />
     </div>
   );
 };
