@@ -315,7 +315,12 @@ const processTurnForPlant = (plant: Plant): Plant => {
       turnsAlive: plant.turnsAlive + 1,
       turnsWithoutCare: turnsWithoutCare,
       condition: PlantCondition.DEAD,
-      growthMessage: `💀 ${plant.name}が枯れてしまいました...`
+      growthMessage: `💀 ${plant.name}が枯れてしまいました...`,
+      // 特殊効果のフラグを追加
+      specialEffect: {
+        type: 'dead',
+        message: `${plant.name}が枯れてしまいました...`
+      }
     };
   }
   
