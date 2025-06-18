@@ -84,6 +84,8 @@ const checkDeadPlants = (state: GameState): GameState => {
       return {
         ...state,
         plants: [], // 植物をクリア
+        currentTurn: 1, // ターン数をリセット
+        actionsRemaining: state.actionsPerTurn, // アクション数をリセット
         eventMessages: [...state.eventMessages, `💀 ${deadPlants[0].name}が枯れてしまいました...`, `🌱 新しい植物を選んでください`],
         specialEffect: {
           type: 'dead',
@@ -307,6 +309,8 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
           updatedState = {
             ...updatedState,
             plants: [], // 植物をクリア
+            currentTurn: 1, // ターン数をリセット
+            actionsRemaining: updatedState.actionsPerTurn, // アクション数をリセット
             eventMessages: [...updatedState.eventMessages, `💀 ${deadPlants[0].name}が枯れてしまいました...`, `🌱 新しい植物を選んでください`],
             specialEffect: {
               type: 'dead',
@@ -381,6 +385,8 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       return {
         ...state,
         plants: state.plants.filter(p => p.id !== plantId),
+        currentTurn: 1, // ターン数をリセット
+        actionsRemaining: state.actionsPerTurn, // アクション数をリセット
         eventMessages: [...state.eventMessages, `🗑️ ${plantToRemove.name}の育成をやめました`],
         specialEffect: {
           type: 'dead',
