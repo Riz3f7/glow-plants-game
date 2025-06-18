@@ -381,10 +381,6 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         },
       };
     }
-      
-      // 実績の更新
-      return updateAchievements(updatedState);
-    }
     
     case 'BUY_ITEM': {
       // ショップからアイテムを購入
