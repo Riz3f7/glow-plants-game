@@ -48,6 +48,7 @@ export interface Plant {
   turnsAlive: number;
   maxStage: GrowthStage;
   turnsWithoutCare?: number; // ケアなしのターン数を追加
+  growthMessage?: string;    // 成長メッセージを追加
 }
 
 // 植物の初期データを生成する関数

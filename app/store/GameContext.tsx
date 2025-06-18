@@ -18,7 +18,8 @@ type GameAction =
   | { type: 'REMOVE_PLANT'; plantId: string }
   | { type: 'BUY_ITEM'; itemId: string }
   | { type: 'USE_ITEM'; itemId: string; plantId: string }
-  | { type: 'COMPLETE_ACHIEVEMENT'; achievementId: string };
+  | { type: 'COMPLETE_ACHIEVEMENT'; achievementId: string }
+  | { type: 'CLEAR_EVENT_MESSAGES' };
 
 // コンテキストの型定義
 interface GameContextType {
@@ -57,6 +58,8 @@ const updateAchievements = (state: GameState): GameState => {
       firstPlantAchievement.progress = 1;
       if (firstPlantAchievement.progress >= firstPlantAchievement.goal) {
         firstPlantAchievement.completed = true;
+        // 実績達成メッセージを追加
+        state.eventMessages.push(`🏆 実績解除: ${firstPlantAchievement.name}`);
       }
     }
   }
@@ -92,6 +95,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         plants: updatedPlants,
         actionsRemaining: state.actionsRemaining - 1,
         careActionCount: (state.careActionCount || 0) + 1, // 世話カウントを追加
+        eventMessages: [...state.eventMessages, `💧 ${updatedPlants[plantIndex].name}に水をあげました`]
       };
       
       // 実績の更新
@@ -112,6 +116,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         plants: updatedPlants,
         actionsRemaining: state.actionsRemaining - 1,
         careActionCount: (state.careActionCount || 0) + 1, // 世話カウントを追加
+        eventMessages: [...state.eventMessages, `🌿 ${updatedPlants[plantIndex].name}に肥料をあげました`]
       };
       
       // 実績の更新
@@ -132,6 +137,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         plants: updatedPlants,
         actionsRemaining: state.actionsRemaining - 1,
         careActionCount: (state.careActionCount || 0) + 1, // 世話カウントを追加
+        eventMessages: [...state.eventMessages, `☀️ ${updatedPlants[plantIndex].name}に日光を当てました`]
       };
       
       // 実績の更新
@@ -144,12 +150,21 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       const plantIndex = state.plants.findIndex(p => p.id === action.plantId);
       if (plantIndex < 0) return state;
       
-      const { plant: updatedPlant, player: updatedPlayer } = harvestPlant(
+      const { plant: updatedPlant, player: updatedPlayer, message, levelUpMessage } = harvestPlant(
         state.plants[plantIndex],
         state.player
       );
       
       const updatedPlants = [...state.plants];
+      
+      // イベントメッセージを準備
+      const newEventMessages = [...state.eventMessages];
+      if (message) {
+        newEventMessages.push(message);
+      }
+      if (levelUpMessage) {
+        newEventMessages.push(levelUpMessage);
+      }
       
       if (updatedPlant === null) {
         // 収穫された植物を削除
@@ -169,6 +184,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
             player: updatedPlayer,
             actionsRemaining: state.actionsRemaining - 1,
             harvestCount: (state.harvestCount || 0) + 1, // 収穫カウントを追加
+            eventMessages: newEventMessages
           };
           
           // 実績の更新
@@ -181,6 +197,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
           player: updatedPlayer,
           actionsRemaining: state.actionsRemaining - 1,
           harvestCount: (state.harvestCount || 0) + 1, // 収穫カウントを追加
+          eventMessages: newEventMessages
         };
         
         // 実績の更新
@@ -193,6 +210,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
           plants: updatedPlants,
           player: updatedPlayer,
           actionsRemaining: state.actionsRemaining - 1,
+          eventMessages: newEventMessages
         };
         
         // 実績の更新
@@ -201,7 +219,43 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
     }
     
     case 'END_TURN': {
+      // ターン終了処理
       updatedState = endTurn(state);
+      
+      // 最大ターン数に達したらゲーム終了フラグを設定
+      if (updatedState.currentTurn > updatedState.maxTurns) {
+        updatedState = {
+          ...updatedState,
+          isGameOver: true,
+          eventMessages: [...updatedState.eventMessages, `🏁 ゲーム終了！最終ターン: ${updatedState.maxTurns}`]
+        };
+      }
+      
+      // 植物の成長メッセージを追加
+      const growthMessages = updatedState.plants
+        .filter(plant => plant.growthMessage)
+        .map(plant => plant.growthMessage as string);
+      
+      if (growthMessages.length > 0) {
+        updatedState = {
+          ...updatedState,
+          eventMessages: [...updatedState.eventMessages, ...growthMessages]
+        };
+        
+        // 成長メッセージをクリア
+        updatedState.plants = updatedState.plants.map(plant => ({
+          ...plant,
+          growthMessage: undefined
+        }));
+      }
+      
+      // ランダムイベントをイベントメッセージに追加
+      if (updatedState.randomEvents.length > 0) {
+        updatedState = {
+          ...updatedState,
+          eventMessages: [...updatedState.eventMessages, ...updatedState.randomEvents]
+        };
+      }
       
       // 実績の更新
       return updateAchievements(updatedState);
@@ -220,10 +274,18 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       updatedState = {
         ...state,
         plants: [...state.plants, plantWithCare],
+        eventMessages: [...state.eventMessages, `🌱 ${newPlant.name}を植えました！`]
       };
       
       // 実績の更新
       return updateAchievements(updatedState);
+    }
+    
+    case 'CLEAR_EVENT_MESSAGES': {
+      return {
+        ...state,
+        eventMessages: []
+      };
     }
     
     default:

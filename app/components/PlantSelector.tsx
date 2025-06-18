@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { Plant } from '../models/Plant';
+import PlantConfirmation from './PlantConfirmation';
 
 interface PlantSelectorProps {
   availablePlants: Plant[];
@@ -11,12 +12,29 @@ interface PlantSelectorProps {
 
 const PlantSelector: React.FC<PlantSelectorProps> = ({ availablePlants, onSelectPlant }) => {
   const [selectedPlantId, setSelectedPlantId] = useState<string | null>(null);
+  const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
+  const [confirmPlant, setConfirmPlant] = useState<Plant | null>(null);
 
-  const handleSelectPlant = () => {
-    const plant = availablePlants.find(p => p.id === selectedPlantId);
-    if (plant) {
-      onSelectPlant(plant);
+  // 植物を選択したときに直接確認ダイアログを表示
+  const handlePlantClick = (plant: Plant) => {
+    setSelectedPlantId(plant.id);
+    setConfirmPlant(plant);
+    setShowConfirmation(true);
+  };
+
+  // 確認ダイアログで「選択する」を押したとき
+  const handleConfirm = () => {
+    if (confirmPlant) {
+      onSelectPlant(confirmPlant);
+      setShowConfirmation(false);
     }
+  };
+
+  // 確認ダイアログで「キャンセル」を押したとき
+  const handleCancel = () => {
+    setShowConfirmation(false);
+    setConfirmPlant(null);
+    setSelectedPlantId(null);
   };
 
   // 植物ごとに異なる背景色を設定
@@ -92,7 +110,7 @@ const PlantSelector: React.FC<PlantSelectorProps> = ({ availablePlants, onSelect
                 position: 'relative',
                 overflow: 'hidden'
               }}
-              onClick={() => setSelectedPlantId(plant.id)}
+              onClick={() => handlePlantClick(plant)}
             >
               {/* 背景装飾 */}
               <div style={{
@@ -272,30 +290,14 @@ const PlantSelector: React.FC<PlantSelectorProps> = ({ availablePlants, onSelect
         })}
       </div>
       
-      <button
-        onClick={handleSelectPlant}
-        disabled={!selectedPlantId}
-        style={{
-          backgroundColor: !selectedPlantId ? '#e0e0e0' : '#4caf50',
-          color: 'white',
-          border: 'none',
-          borderRadius: '8px',
-          padding: '12px',
-          width: '100%',
-          fontSize: '16px',
-          fontWeight: 'bold',
-          cursor: !selectedPlantId ? 'not-allowed' : 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: !selectedPlantId ? 'none' : '0 4px 8px rgba(76, 175, 80, 0.3)',
-          transition: 'all 0.3s ease',
-          opacity: !selectedPlantId ? 0.7 : 1
-        }}
-      >
-        <span style={{ marginRight: '8px', fontSize: '20px' }}>🌱</span>
-        この植物を育てる
-      </button>
+      {/* 確認ダイアログ */}
+      {showConfirmation && (
+        <PlantConfirmation
+          plant={confirmPlant}
+          onConfirm={handleConfirm}
+          onCancel={handleCancel}
+        />
+      )}
     </div>
   );
 };

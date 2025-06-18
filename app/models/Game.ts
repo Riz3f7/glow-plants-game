@@ -53,6 +53,8 @@ export interface GameState {
   randomEvents: string[];
   careActionCount?: number; // 世話をした回数
   harvestCount?: number; // 収穫した回数
+  eventMessages: string[]; // イベントメッセージを追加
+  isGameOver?: boolean;   // ゲーム終了フラグを追加
 }
 
 // 初期ゲーム状態を作成する関数
@@ -77,7 +79,9 @@ export const createInitialGameState = (): GameState => {
     weather: 'sunny',
     randomEvents: [],
     careActionCount: 0,
-    harvestCount: 0
+    harvestCount: 0,
+    eventMessages: [],
+    isGameOver: false
   };
 };
 
@@ -136,16 +140,21 @@ export const addCurrency = (player: Player, amount: number): Player => {
 };
 
 // プレイヤーに経験値を追加する関数
-export const addExperience = (player: Player, amount: number): Player => {
+export const addExperience = (player: Player, amount: number): { player: Player, levelUpMessage?: string } => {
   const updatedPlayer = { ...player };
   updatedPlayer.experience += amount;
+  
+  let levelUpMessage: string | undefined;
   
   // レベルアップの処理
   while (updatedPlayer.experience >= updatedPlayer.experienceToNextLevel) {
     updatedPlayer.experience -= updatedPlayer.experienceToNextLevel;
     updatedPlayer.level += 1;
     updatedPlayer.experienceToNextLevel = Math.floor(updatedPlayer.experienceToNextLevel * 1.5);
+    
+    // レベルアップメッセージを設定
+    levelUpMessage = `🎉 レベルアップ！ レベル${updatedPlayer.level}になりました！`;
   }
   
-  return updatedPlayer;
+  return { player: updatedPlayer, levelUpMessage };
 };

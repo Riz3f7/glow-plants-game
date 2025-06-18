@@ -20,6 +20,39 @@ body {
   padding: 0;
 }
 
+/* イベントメッセージのアニメーション */
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.event-messages {
+  animation: slideUp 0.3s ease-out;
+}
+
+/* レベルアップアニメーション */
+@keyframes levelUpPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.level-up-animation {
+  animation: levelUpPulse 0.5s ease-in-out;
+}
+
 /* ゲームコンテナスタイル */
 .game-container {
   max-width: 500px;

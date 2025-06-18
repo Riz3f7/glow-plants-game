@@ -64,7 +64,7 @@ export const giveSunlight = (plant: Plant): Plant => {
 };
 
 // 植物を収穫する
-export const harvestPlant = (plant: Plant, player: Player): { plant: Plant | null, player: Player } => {
+export const harvestPlant = (plant: Plant, player: Player): { plant: Plant | null, player: Player, message?: string, levelUpMessage?: string } => {
   // 収穫可能な状態かチェック
   if (plant.currentStage !== GrowthStage.FRUITING) {
     return { plant, player }; // 収穫できない場合は何も変更しない
@@ -80,15 +80,33 @@ export const harvestPlant = (plant: Plant, player: Player): { plant: Plant | nul
   const currencyReward = Math.floor(30 * rewardMultiplier);
   
   // 経験値と通貨を追加
-  const updatedPlayer = addExperience(player, experienceReward);
+  const { player: updatedPlayer, levelUpMessage } = addExperience(player, experienceReward);
   updatedPlayer.currency += currencyReward;
   
+  // 収穫成功メッセージを作成
+  const conditionText = plant.condition === PlantCondition.EXCELLENT ? '最高品質の' :
+                       plant.condition === PlantCondition.GOOD ? '良質な' :
+                       plant.condition === PlantCondition.NORMAL ? '' :
+                       plant.condition === PlantCondition.POOR ? '品質の低い' : '品質の悪い';
+  
+  const celebrationMessage = `🎉 ${plant.name}を収穫しました！ ${conditionText}収穫で${experienceReward}経験値と${currencyReward}Gを獲得！`;
+  
   // 収穫後は植物がなくなる
-  return { plant: null, player: updatedPlayer };
+  return { 
+    plant: null, 
+    player: updatedPlayer,
+    message: celebrationMessage,
+    levelUpMessage
+  };
 };
 
 // ターン終了時の処理
 export const endTurn = (gameState: GameState): GameState => {
+  // 最大ターン数を超えた場合は現在の状態を返す（ゲーム終了）
+  if (gameState.currentTurn >= gameState.maxTurns) {
+    return gameState;
+  }
+
   const updatedPlants = gameState.plants.map(plant => processTurnForPlant(plant));
   
   // 天候の変化（ランダム）
@@ -248,6 +266,7 @@ const processTurnForPlant = (plant: Plant): Plant => {
   }
   
   // 成長段階の更新
+  let growthMessage = null;
   if (updatedStats.growthProgress >= 100) {
     console.log(`植物 ${plant.name} の成長段階を更新します。現在の段階: ${updatedStage}`);
     
@@ -255,26 +274,31 @@ const processTurnForPlant = (plant: Plant): Plant => {
     if (updatedStage === GrowthStage.SEED) {
       updatedStage = GrowthStage.SPROUT;
       updatedStats.growthProgress = 0;
+      growthMessage = `🌱 ${plant.name}が発芽しました！`;
       console.log(`植物 ${plant.name} が発芽しました！`);
     } 
     else if (updatedStage === GrowthStage.SPROUT) {
       updatedStage = GrowthStage.GROWING;
       updatedStats.growthProgress = 0;
+      growthMessage = `🌿 ${plant.name}が成長中になりました！`;
       console.log(`植物 ${plant.name} が成長中になりました！`);
     } 
     else if (updatedStage === GrowthStage.GROWING) {
       updatedStage = GrowthStage.MATURE;
       updatedStats.growthProgress = 0;
+      growthMessage = `🌳 ${plant.name}が成熟しました！`;
       console.log(`植物 ${plant.name} が成熟しました！`);
     } 
     else if (updatedStage === GrowthStage.MATURE) {
       updatedStage = GrowthStage.FLOWERING;
       updatedStats.growthProgress = 0;
+      growthMessage = `🌸 ${plant.name}が開花しました！美しい花が咲きました！`;
       console.log(`植物 ${plant.name} が開花しました！`);
     } 
     else if (updatedStage === GrowthStage.FLOWERING) {
       updatedStage = GrowthStage.FRUITING;
       updatedStats.growthProgress = 100; // 最終段階では100%のままにする
+      growthMessage = `🍎 ${plant.name}に実がなりました！収穫できます！`;
       console.log(`植物 ${plant.name} が実をつけました！`);
     }
     
@@ -290,7 +314,8 @@ const processTurnForPlant = (plant: Plant): Plant => {
       currentStage: updatedStage,
       turnsAlive: plant.turnsAlive + 1,
       turnsWithoutCare: turnsWithoutCare,
-      condition: PlantCondition.DEAD
+      condition: PlantCondition.DEAD,
+      growthMessage: `💀 ${plant.name}が枯れてしまいました...`
     };
   }
   
@@ -301,6 +326,7 @@ const processTurnForPlant = (plant: Plant): Plant => {
     currentStage: updatedStage,
     turnsAlive: plant.turnsAlive + 1,
     turnsWithoutCare: turnsWithoutCare,
+    growthMessage: growthMessage
   };
   
   // 条件の更新

@@ -11,6 +11,8 @@ import Inventory from './components/Inventory';
 import Shop from './components/Shop';
 import PlantCollection from './components/PlantCollection';
 import Achievements from './components/Achievements';
+import EventMessages from './components/EventMessages';
+import GameOver from './components/GameOver';
 
 // ゲームの状態
 type GameScreen = 'title' | 'garden' | 'shop' | 'collection' | 'achievements';
@@ -116,6 +118,11 @@ const GameScreen: React.FC = () => {
   // ターン終了
   const handleEndTurn = () => {
     dispatch({ type: 'END_TURN' });
+  };
+  
+  // ゲームを再スタート
+  const handleRestart = () => {
+    dispatch({ type: 'START_GAME' });
   };
   
   // PC用のナビゲーション
@@ -355,6 +362,12 @@ const GameScreen: React.FC = () => {
       
       {renderPcFooter()}
       {renderMobileNavigation()}
+      
+      {/* イベントメッセージ表示 */}
+      <EventMessages />
+      
+      {/* ゲーム終了時の表示 */}
+      {state.isGameOver && <GameOver onRestart={handleRestart} />}
     </>
   );
 };
