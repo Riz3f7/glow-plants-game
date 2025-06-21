@@ -136,7 +136,9 @@ const Shop: React.FC<ShopProps> = ({ items, playerCurrency, onBuyItem }) => {
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   position: 'relative',
-                  overflow: 'hidden'
+                  overflow: 'hidden',
+                  height: '100px', // 固定の高さを設定
+                  minHeight: '100px' // 最小の高さも設定
                 }}
               >
                 {/* 背景装飾 */}

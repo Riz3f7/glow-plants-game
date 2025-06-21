@@ -163,7 +163,11 @@ const Achievements: React.FC<AchievementsProps> = ({ achievements }) => {
                 border: `2px solid ${achievement.completed ? style.accent : style.border}`,
                 boxShadow: achievement.completed ? `0 4px 8px rgba(0, 0, 0, 0.1)` : '0 2px 4px rgba(0, 0, 0, 0.05)',
                 position: 'relative',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                height: '150px', // 固定の高さを設定
+                minHeight: '150px', // 最小の高さも設定
+                display: 'flex',
+                flexDirection: 'column'
               }}
             >
               {/* 背景装飾 */}
@@ -186,7 +190,8 @@ const Achievements: React.FC<AchievementsProps> = ({ achievements }) => {
                 justifyContent: 'space-between',
                 alignItems: 'flex-start',
                 position: 'relative',
-                zIndex: 1
+                zIndex: 1,
+                flex: 1
               }}>
                 <div style={{ flex: 1 }}>
                   <h3 style={{

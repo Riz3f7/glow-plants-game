@@ -127,7 +127,12 @@ const PlantCollection: React.FC<PlantCollectionProps> = ({ discoveredPlants, tot
                   transition: 'all 0.3s ease',
                   backgroundColor: selectedPlant?.id === plant.id ? colors.bg : 'white',
                   border: `2px solid ${selectedPlant?.id === plant.id ? colors.accent : colors.border}`,
-                  boxShadow: selectedPlant?.id === plant.id ? `0 4px 8px rgba(0, 0, 0, 0.1)` : 'none'
+                  boxShadow: selectedPlant?.id === plant.id ? `0 4px 8px rgba(0, 0, 0, 0.1)` : 'none',
+                  height: '120px', // 固定の高さを設定
+                  minHeight: '120px', // 最小の高さも設定
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center'
                 }}
                 onClick={() => setSelectedPlant(plant)}
               >
