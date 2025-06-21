@@ -164,8 +164,8 @@ const Achievements: React.FC<AchievementsProps> = ({ achievements }) => {
                 boxShadow: achievement.completed ? `0 4px 8px rgba(0, 0, 0, 0.1)` : '0 2px 4px rgba(0, 0, 0, 0.05)',
                 position: 'relative',
                 overflow: 'hidden',
-                height: '150px', // 固定の高さを設定
-                minHeight: '150px', // 最小の高さも設定
+                height: '100px', // 高さを150pxから100pxに減らす
+                minHeight: '100px', // 最小の高さも100pxに減らす
                 display: 'flex',
                 flexDirection: 'column'
               }}
@@ -195,23 +195,23 @@ const Achievements: React.FC<AchievementsProps> = ({ achievements }) => {
               }}>
                 <div style={{ flex: 1 }}>
                   <h3 style={{
-                    fontSize: '16px',
+                    fontSize: '14px', // フォントサイズを小さく
                     fontWeight: 'bold',
                     color: achievement.completed ? style.accent : '#333',
-                    margin: '0 0 5px 0',
+                    margin: '0 0 3px 0', // マージンを小さく
                     display: 'flex',
                     alignItems: 'center'
                   }}>
-                    <span style={{ fontSize: '18px', marginRight: '8px' }}>{style.icon}</span>
+                    <span style={{ fontSize: '16px', marginRight: '6px' }}>{style.icon}</span>
                     {achievement.completed && (
                       <span style={{ color: style.accent, marginRight: '5px' }}>✓</span>
                     )}
                     {achievement.name}
                   </h3>
                   <p style={{
-                    fontSize: '13px',
+                    fontSize: '12px', // フォントサイズを小さく
                     color: '#666',
-                    margin: '0 0 10px 0'
+                    margin: '0 0 5px 0' // マージンを小さく
                   }}>{achievement.description}</p>
                 </div>
                 <div style={{
@@ -251,10 +251,10 @@ const Achievements: React.FC<AchievementsProps> = ({ achievements }) => {
 
               <div style={{
                 width: '100%',
-                height: '8px',
+                height: '6px', // 高さを8pxから6pxに減らす
                 backgroundColor: '#f5f5f5',
-                borderRadius: '4px',
-                marginTop: '10px',
+                borderRadius: '3px', // 角丸も調整
+                marginTop: '5px', // マージンを小さく
                 overflow: 'hidden'
               }}>
                 <div
