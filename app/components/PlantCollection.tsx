@@ -31,7 +31,10 @@ const PlantCollection: React.FC<PlantCollectionProps> = ({ discoveredPlants, tot
       backgroundColor: 'white',
       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
       border: '2px solid #e8f5e9',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      maxHeight: 'calc(100vh - 120px)',
+      display: 'flex',
+      flexDirection: 'column'
     }}>
       {/* 装飾要素 */}
       <div style={{
@@ -105,7 +108,10 @@ const PlantCollection: React.FC<PlantCollectionProps> = ({ discoveredPlants, tot
           display: 'grid',
           gridTemplateColumns: 'repeat(4, 1fr)',
           gap: '10px',
-          marginBottom: '20px'
+          marginBottom: '20px',
+          overflowY: 'auto',
+          maxHeight: 'calc(100vh - 300px)',
+          paddingRight: '5px'
         }}>
           {discoveredPlants.map(plant => {
             const colors = plantColors[plant.id as keyof typeof plantColors] || 

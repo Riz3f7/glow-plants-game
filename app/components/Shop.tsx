@@ -38,7 +38,10 @@ const Shop: React.FC<ShopProps> = ({ items, playerCurrency, onBuyItem }) => {
       backgroundColor: 'white',
       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
       border: '2px solid #e8f5e9',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      maxHeight: 'calc(100vh - 120px)',
+      display: 'flex',
+      flexDirection: 'column'
     }}>
       {/* 装飾要素 */}
       <div style={{
@@ -111,7 +114,10 @@ const Shop: React.FC<ShopProps> = ({ items, playerCurrency, onBuyItem }) => {
         <div style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '15px'
+          gap: '15px',
+          overflowY: 'auto',
+          maxHeight: 'calc(100vh - 250px)',
+          paddingRight: '5px'
         }}>
           {unlockedItems.map(item => {
             const colors = getItemColors(item);

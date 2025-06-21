@@ -62,7 +62,10 @@ const Achievements: React.FC<AchievementsProps> = ({ achievements }) => {
       backgroundColor: 'white',
       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
       border: '2px solid #e1bee7',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      maxHeight: 'calc(100vh - 120px)',
+      display: 'flex',
+      flexDirection: 'column'
     }}>
       {/* 装飾要素 */}
       <div style={{
@@ -141,7 +144,10 @@ const Achievements: React.FC<AchievementsProps> = ({ achievements }) => {
       <div style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '15px'
+        gap: '15px',
+        overflowY: 'auto',
+        maxHeight: 'calc(100vh - 300px)',
+        paddingRight: '5px'
       }}>
         {achievements.map(achievement => {
           const style = achievementStyles[achievement.id as keyof typeof achievementStyles] || 
