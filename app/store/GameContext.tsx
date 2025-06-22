@@ -217,6 +217,9 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         const harvestedPlant = state.plants[plantIndex];
         const alreadyDiscovered = state.discoveredPlants.some(p => p.species === harvestedPlant.species);
         
+        // 収穫後に植物がなくなった場合、ターン数をリセット
+        const shouldResetTurn = updatedPlants.length === 0;
+        
         if (!alreadyDiscovered) {
           const discoveredPlants = [...state.discoveredPlants, harvestedPlant];
           
@@ -225,9 +228,12 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
             plants: updatedPlants,
             discoveredPlants,
             player: updatedPlayer,
+            currentTurn: shouldResetTurn ? 1 : state.currentTurn, // 植物がなくなった場合はターン数をリセット
             actionsRemaining: state.actionsRemaining - 1,
             harvestCount: (state.harvestCount || 0) + 1, // 収穫カウントを追加
-            eventMessages: newEventMessages,
+            eventMessages: shouldResetTurn 
+              ? [...newEventMessages, '🌱 新しい植物を選んでください'] 
+              : newEventMessages,
             specialEffect: {
               type: 'harvest',
               message: `🎉 ${harvestedPlant.name}を収穫しました！ 🎉`
@@ -242,9 +248,12 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
           ...state,
           plants: updatedPlants,
           player: updatedPlayer,
+          currentTurn: shouldResetTurn ? 1 : state.currentTurn, // 植物がなくなった場合はターン数をリセット
           actionsRemaining: state.actionsRemaining - 1,
           harvestCount: (state.harvestCount || 0) + 1, // 収穫カウントを追加
-          eventMessages: newEventMessages,
+          eventMessages: shouldResetTurn 
+            ? [...newEventMessages, '🌱 新しい植物を選んでください'] 
+            : newEventMessages,
           specialEffect: {
             type: 'harvest',
             message: `🎉 ${harvestedPlant.name}を収穫しました！ 🎉`
